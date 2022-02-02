@@ -13,7 +13,7 @@
    <children>
       <ImageView fitHeight="769.0" fitWidth="1137.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@warcaby.jpg" />
+            <Image url="@../../../../resources/warcaby.jpg" />
          </image>
       </ImageView>
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="769.0" layoutX="769.0" stroke="BLACK" strokeType="INSIDE" width="598.0" />
@@ -134,5 +134,6 @@
       <Button layoutX="607.0" layoutY="233.0" mnemonicParsing="false" onAction="#button6H" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="6H" />
       <Button layoutX="385.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7E" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7E" />
       <Button layoutX="530.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7G" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7G" />
+      <Button layoutX="1176.0" layoutY="291.0" mnemonicParsing="false" onAction="#buttonBot" prefHeight="78.0" prefWidth="140.0" text="Bot" />
    </children>
 </AnchorPane>

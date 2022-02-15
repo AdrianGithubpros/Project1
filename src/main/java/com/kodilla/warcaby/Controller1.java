@@ -1276,7 +1276,7 @@ public class Controller1 {
                 turn = false;
             }
         }else{
-            whitePieces.remove(prev);
+            whitePieces.remove(prev.substring(0,3));
 
             if(prev.length() == 4){
                 whitePieces.put(next.substring(0, 3), new Piece(true));

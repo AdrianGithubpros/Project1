@@ -21,19 +21,19 @@
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="1154.0" layoutY="93.0" mnemonicParsing="false" onAction="#startWithRed" prefHeight="46.0" prefWidth="183.0" text="Start with Red">
+      <Button layoutX="1154.0" layoutY="169.0" mnemonicParsing="false" onAction="#laod" prefHeight="46.0" prefWidth="183.0" text="Load last game">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button fx:id="quitButtonGame" layoutX="1154.0" layoutY="214.0" mnemonicParsing="false" onAction="#quitGameToDesktop" prefHeight="46.0" prefWidth="183.0" text="Quit to Desktop">
+      <Button fx:id="quitButtonGame" layoutX="1154.0" layoutY="303.0" mnemonicParsing="false" onAction="#quitGameToDesktop" prefHeight="46.0" prefWidth="183.0" text="Quit to Desktop">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="1154.0" layoutY="154.0" mnemonicParsing="false" onAction="#quitToMenu" prefHeight="46.0" prefWidth="183.0" text="Quit to Menu">
+      <Button layoutX="1154.0" layoutY="233.0" mnemonicParsing="false" onAction="#quitToMenu" prefHeight="46.0" prefWidth="183.0" text="Quit to Menu">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Label fx:id="checkLabel" alignment="CENTER" layoutX="851.0" layoutY="169.0" prefHeight="103.0" prefWidth="183.0" text="Label" textFill="#b8c91f">
+      <Label fx:id="checkLabel" alignment="CENTER" layoutX="867.0" layoutY="28.0" prefHeight="103.0" prefWidth="183.0" text="Label" textFill="#b8c91f">
          <font>
             <Font size="57.0" />
          </font>
@@ -134,5 +134,10 @@
       <Button layoutX="607.0" layoutY="233.0" mnemonicParsing="false" onAction="#button6H" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="6H" />
       <Button layoutX="385.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7E" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7E" />
       <Button layoutX="530.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7G" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7G" />
+      <Button layoutX="1154.0" layoutY="102.0" mnemonicParsing="false" onAction="#save" prefHeight="46.0" prefWidth="183.0" text="Save game">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

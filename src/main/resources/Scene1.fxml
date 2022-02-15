@@ -13,22 +13,22 @@
             <Image url="@medieval.jpg" />
          </image>
       </ImageView>
-      <Button layoutX="154.0" layoutY="42.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Start New Game">
+      <Button layoutX="154.0" layoutY="42.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Start Game">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
-      <Button layoutX="154.0" layoutY="106.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Start New Game">
+      <Button layoutX="154.0" layoutY="99.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Game rules">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
-      <Button layoutX="154.0" layoutY="173.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Start New Game">
+      <Button layoutX="154.0" layoutY="155.0" mnemonicParsing="false" onAction="#switchToScene2" prefHeight="47.0" prefWidth="197.0" text="Credits">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
-      <Button fx:id="quitButtonMenu" layoutX="154.0" layoutY="236.0" mnemonicParsing="false" onAction="#quitMenuToDesktop" prefHeight="47.0" prefWidth="197.0" text="Quit to Desktop">
+      <Button fx:id="quitButtonMenu" layoutX="154.0" layoutY="209.0" mnemonicParsing="false" onAction="#quitMenuToDesktop" prefHeight="47.0" prefWidth="197.0" text="Quit to Desktop">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>

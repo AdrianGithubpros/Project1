@@ -15,39 +15,46 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.*;
 
 
 public class Controller1 {
+    Timer timer = new Timer();
     private Stage stage;
     private Scene scene;
     private Parent root;
-    private GameInfo gameInfo = new GameInfo();
     boolean clicked = false;
     boolean gameStarted = false;
     Color playerColor = Color.BLACK;
-    private FieldInfo playerField = new FieldInfo(0,"","","",false);
-    private FieldInfo removeField = new FieldInfo(0,"","","",false);
-
+    boolean botLost = false;
+    private Utility utility = new Utility();
+    private AI ai = new AI(utility);
+    private Map<String, Piece> redPieces = new HashMap<>();
+    private Map<String, Piece> whitePieces = new HashMap<>();
+    private int[][] boardTable = new int[8][8];
+    SaveLoad saveLoad = new SaveLoad();
+    private String previousPlace = "";
+    private String nextPlace = "";
+    private boolean turn = true;
+    private boolean jumpleMove = false;
+    private List<String[]> jumpMovesToRemove;
     @FXML
     private Circle c8B,c8D,c8F,c8H,c7A,c7C,c7E,c7G,c6B,c6D,c6F,c6H,c5A,c5C,c5E,c5G,c4B,c4D,c4F,c4H,c3A,c3C,c3E,c3G, c2B,c2D,c2F,c2H,c1A,c1C,c1E,c1G;
     @FXML
     private Circle c8Bm,c8Dm,c8Fm,c8Hm,c7Am,c7Cm,c7Em,c7Gm,c6Bm,c6Dm,c6Fm,c6Hm,c5Am,c5Cm,c5Em,c5Gm,c4Bm,c4Dm,c4Fm,c4Hm,c3Am,c3Cm,c3Em,c3Gm,c2Bm,c2Dm,c2Fm,c2Hm,c1Am,c1Cm,c1Em,c1Gm;
     @FXML
-    private Button quitButtonMenu;
-    @FXML
-    private Button quitButtonGame;
-    @FXML
     private AnchorPane scenePane1;
     @FXML
     private AnchorPane scenePane2;
-    @FXML
-    private Button button8B;
-    @FXML
-    private Label checkLabel;
 
-
-
+    public void setRedPieces(Map<String, Piece> redPieces) {
+        this.redPieces = redPieces;
+    }
+    public void setWhitePieces(Map<String, Piece> whitePieces) {
+        this.whitePieces = whitePieces;
+    }
     public void switchToScene2(ActionEvent event) throws IOException {
 
         root = FXMLLoader.load(getClass().getClassLoader().getResource("Scene2.fxml"));
@@ -56,8 +63,6 @@ public class Controller1 {
         stage.setScene(scene);
         stage.show();
     }
-
-
     public void quitToMenu(ActionEvent event) throws IOException {
         root = FXMLLoader.load(getClass().getClassLoader().getResource("Scene1.fxml"));
         stage = (Stage)((Node)event.getSource()).getScene().getWindow();
@@ -65,7 +70,6 @@ public class Controller1 {
         stage.setScene(scene);
         stage.show();
     }
-
     public void quitMenuToDesktop(ActionEvent event){
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Quit");
@@ -84,8 +88,7 @@ public class Controller1 {
             stage = (Stage)scenePane2.getScene().getWindow();
             stage.close();}
     }
-
-    public void startWithWhite(){
+    public void startWithWhite(ActionEvent event){
         //8
         c8B.setFill(Color.RED);
         c8B.setVisible(true);
@@ -97,13 +100,13 @@ public class Controller1 {
         c8H.setVisible(true);
         // 7
         c7A.setFill(Color.RED);
-        c7A.setVisible(false);
+        c7A.setVisible(true);
         c7C.setFill(Color.RED);
-        c7C.setVisible(false);
+        c7C.setVisible(true);
         c7E.setFill(Color.RED);
-        c7E.setVisible(false);
+        c7E.setVisible(true);
         c7G.setFill(Color.RED);
-        c7G.setVisible(false);
+        c7G.setVisible(true);
         // 6
         c6B.setFill(Color.RED);
         c6B.setVisible(true);
@@ -150,3174 +153,881 @@ public class Controller1 {
         c1C.setVisible(true);
         c1E.setVisible(true);
         c1G.setVisible(true);
-
+        System.out.println("hmm somthing is wrong");
         gameStarted = true;
         playerColor = Color.WHITE;
-
-
-
-    }
-
-    public void startWithRed(){
-        //8
-        c8B.setFill(Color.WHITE);
-        c8B.setVisible(true);
-        c8D.setFill(Color.WHITE);
-        c8D.setVisible(true);
-        c8F.setFill(Color.WHITE);
-        c8F.setVisible(true);
-        c8H.setFill(Color.WHITE);
-        c8H.setVisible(true);
-        // 7
-        c7A.setFill(Color.WHITE);
-        c7A.setVisible(true);
-        c7C.setFill(Color.WHITE);
-        c7C.setVisible(true);
-        c7E.setFill(Color.WHITE);
-        c7E.setVisible(true);
-        c7G.setFill(Color.WHITE);
-        c7G.setVisible(true);
-        // 6
-        c6B.setFill(Color.WHITE);
-        c6B.setVisible(true);
-        c6D.setFill(Color.WHITE);
-        c6D.setVisible(true);
-        c6F.setFill(Color.WHITE);
-        c6F.setVisible(true);
-        c6H.setFill(Color.WHITE);
-        c6H.setVisible(true);
-        // 5 mid
-        c5A.setVisible(false);
-        c5C.setVisible(false);
-        c5E.setVisible(false);
-        c5G.setVisible(false);
-        // 4 mid
-        c4B.setVisible(false);
-        c4D.setVisible(false);
-        c4F.setVisible(false);
-        c4H.setVisible(false);
-        // 3
-        c3A.setFill(Color.RED);
-        c3C.setFill(Color.RED);
-        c3E.setFill(Color.RED);
-        c3G.setFill(Color.RED);
-        c3A.setVisible(true);
-        c3C.setVisible(true);
-        c3E.setVisible(true);
-        c3G.setVisible(true);
-        // 2
-        c2B.setFill(Color.RED);
-        c2D.setFill(Color.RED);
-        c2F.setFill(Color.RED);
-        c2H.setFill(Color.RED);
-        c2B.setVisible(true);
-        c2D.setVisible(true);
-        c2F.setVisible(true);
-        c2H.setVisible(true);
-        // 1
-        c1A.setFill(Color.RED);
-        c1C.setFill(Color.RED);
-        c1E.setFill(Color.RED);
-        c1G.setFill(Color.RED);
-        c1A.setVisible(true);
-        c1C.setVisible(true);
-        c1E.setVisible(true);
-        c1G.setVisible(true);
-
-        gameStarted = true;
-        playerColor = Color.RED;
+        setBoard();
+        showPlayerMovements();
 
     }
-    // 8
-    public void button8B(ActionEvent event){
-        if ( gameStarted == true){
-            if (clicked == false){
-                for (FieldInfo field : gameInfo.gameList) {
-                    System.out.println("number: " + field.getNumber());
-                    System.out.println("Letter: " + field.getLetter());
-                    System.out.println("Occupation: " + field.isOccupation());
-                    System.out.println("Status: " + field.getStatus());
-                    System.out.println("membership: " + field.getMembership());
-                    System.out.println("NEXT");
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Am.setVisible(true);
-                                        c3Am.setFill(Color.YELLOW);
-                                        c3A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        gameInfo.gameList.remove(playerField);
-                                    }
-                                }
-
-
-                            } else {
-
-
-                            }
-
-                        }
+    public void setBoard(){
+        for (int y = boardTable.length - 1; y >= 0; y--){
+            for (int x = 0; x < boardTable[y].length; x++) {
+                if ((x % 2 == 1 && y % 2 == 1) || (x % 2 == 0 && y % 2 == 0)) {
+                    if (y < 3) {
+                        whitePieces.put(String.valueOf(x) + ":" + String.valueOf(y), new Piece());
                     }
-                }
-            } else {
-                if(c3Am.isVisible() && c3Am.getFill() == Color.YELLOW){
-                    gameInfo.gameList.add(playerField);
-                    c3A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Am.isVisible()){
-                    playerField.setLetter("A");
-                    playerField.setNumber(3);
-                    playerField.setMembership("player");
-                    playerField.setOccupation(true);
-                    playerField.setStatus("pawn");
-                    gameInfo.gameList.add(playerField);
-                    c4B.setVisible(true);
-                    c4B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
+                    if (y > 4) {
+                        redPieces.put(String.valueOf(x) + ":" + String.valueOf(y), new Piece());
+                    }
                 }
             }
         }
+    }
+
+    // 8
+    public void button8B(ActionEvent event){
+        if(!clicked && c8B.getFill().equals(Color.YELLOW)){
+            int[] field = {1,7};
+            showMovementPlaces(field);
+            if(whitePieces.get("1:7").isKing()){
+                previousPlace = "1:7k";
+            }else{
+                previousPlace = "1:7";
+            }
+
+            clicked = true;
+
+        }else if(clicked && c8Bm.isVisible()){
+            hideDots();
+            nextPlace = "1:7";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c8B.getFill().equals(Color.YELLOW) && c8B.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
+
 
     }
     public void button8D(ActionEvent event){
-        if ( gameStarted == true){
-            if (clicked == false){
-                for (FieldInfo field : gameInfo.gameList) {
-                    System.out.println("number: " + field.getNumber());
-                    System.out.println("Letter: " + field.getLetter());
-                    System.out.println("Occupation: " + field.isOccupation());
-                    System.out.println("Status: " + field.getStatus());
-                    System.out.println("membership: " + field.getMembership());
-                    System.out.println("NEXT");
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Am.setVisible(true);
-                                        c3Am.setFill(Color.YELLOW);
-                                        c3A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        gameInfo.gameList.remove(playerField);
-                                    }
-                                }
-
-
-                            } else {
-
-
-                            }
-
-                        }
-                    }
-                }
-            } else {
-                if(c3Am.isVisible() && c3Am.getFill() == Color.YELLOW){
-                    gameInfo.gameList.add(playerField);
-                    c3A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Am.isVisible()){
-                    playerField.setLetter("A");
-                    playerField.setNumber(3);
-                    playerField.setMembership("player");
-                    playerField.setOccupation(true);
-                    playerField.setStatus("pawn");
-                    gameInfo.gameList.add(playerField);
-                    c4B.setVisible(true);
-                    c4B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                }
+        if(!clicked && c8D.getFill().equals(Color.YELLOW)){
+            int[] field = {3,7};
+            showMovementPlaces(field);
+            clicked = true;
+            if(whitePieces.get("3:7").isKing()){
+                previousPlace = "3:7k";
+            }else{
+                previousPlace = "3:7";
             }
+        }else if(clicked && c8Dm.isVisible()){
+            hideDots();
+            nextPlace = "3:7";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c8D.getFill().equals(Color.YELLOW) && c8D.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
     }
     public void button8F(ActionEvent event){
-        if ( gameStarted == true){
-            if (clicked == false){
-                for (FieldInfo field : gameInfo.gameList) {
-                    System.out.println("number: " + field.getNumber());
-                    System.out.println("Letter: " + field.getLetter());
-                    System.out.println("Occupation: " + field.isOccupation());
-                    System.out.println("Status: " + field.getStatus());
-                    System.out.println("membership: " + field.getMembership());
-                    System.out.println("NEXT");
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Am.setVisible(true);
-                                        c3Am.setFill(Color.YELLOW);
-                                        c3A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        gameInfo.gameList.remove(playerField);
-                                    }
-                                }
-
-
-                            } else {
-
-
-                            }
-
-                        }
-                    }
-                }
-            } else {
-                if(c3Am.isVisible() && c3Am.getFill() == Color.YELLOW){
-                    gameInfo.gameList.add(playerField);
-                    c3A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Am.isVisible()){
-                    playerField.setLetter("A");
-                    playerField.setNumber(3);
-                    playerField.setMembership("player");
-                    playerField.setOccupation(true);
-                    playerField.setStatus("pawn");
-                    gameInfo.gameList.add(playerField);
-                    c4B.setVisible(true);
-                    c4B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                }
+        if(!clicked && c8F.getFill().equals(Color.YELLOW)){
+            int[] field = {5,7};
+            if(whitePieces.get("5:7").isKing()){
+                previousPlace = "5:7k";
+            }else{
+                previousPlace = "5:7";
             }
-        }
+            showMovementPlaces(field);
+            clicked = true;
 
+        }else if(clicked && c8Fm.isVisible()){
+            hideDots();
+            nextPlace = "5:7";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c8F.getFill().equals(Color.YELLOW) && c8F.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
     }
     public void button8H(ActionEvent event){
-        if ( gameStarted == true){
-            if (clicked == false){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Am.setVisible(true);
-                                        c3Am.setFill(Color.YELLOW);
-                                        c3A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        gameInfo.gameList.remove(playerField);
-                                    }
-                                }
-
-
-                            } else {
-
-
-                            }
-
-                        }
-                    }
-                }
-            } else {
-                if(c3Am.isVisible() && c3Am.getFill() == Color.YELLOW){
-                    gameInfo.gameList.add(playerField);
-                    c3A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Am.isVisible()){
-                    playerField.setLetter("A");
-                    playerField.setNumber(3);
-                    playerField.setMembership("player");
-                    playerField.setOccupation(true);
-                    playerField.setStatus("pawn");
-                    gameInfo.gameList.add(playerField);
-                    c4B.setVisible(true);
-                    c4B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                }
+        if(!clicked && c8H.getFill().equals(Color.YELLOW)){
+            int[] field = {7,7};
+            if(whitePieces.get("7:7").isKing()){
+                previousPlace = "7:7k";
+            }else{
+                previousPlace = "7:7";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c8Hm.isVisible()){
+            hideDots();
+            nextPlace = "7:7";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c8H.getFill().equals(Color.YELLOW) && c8H.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-    // 7
     }
+
     public void button7A(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 7){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 8){
-                                        c8Bm.setVisible(true);
-                                        c7Am.setVisible(true);
-                                        c7Am.setFill(Color.YELLOW);
-                                        c7A.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c7A.getFill().equals(Color.YELLOW)){
+            int[] field = {0,6};
+            if(whitePieces.get("0:6").isKing()){
+                previousPlace = "0:6k";
+            }else{
+                previousPlace = "0:6";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-                if(c7Am.isVisible() && c7Am.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c7Am.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7A.setVisible(true);
-                    c7A.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c7Am.isVisible()){
+            hideDots();
+            nextPlace = "0:6";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c7A.getFill().equals(Color.YELLOW) && c7A.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
 
     }
     public void button7C(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 7){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("D") && field1.getNumber() == 8){
-                                        c8Dm.setVisible(true);
-                                        c7Cm.setVisible(true);
-                                        c7Cm.setFill(Color.YELLOW);
-                                        c7C.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c7C.getFill().equals(Color.YELLOW)){
+            int[] field = {2,6};
+            if(whitePieces.get("2:6").isKing()){
+                previousPlace = "2:6k";
+            }else{
+                previousPlace = "2:6";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("B") && field2.getNumber() == 8){
-                                        c8Bm.setVisible(true);
-                                        c7Cm.setVisible(true);
-                                        c7Cm.setFill(Color.YELLOW);
-                                        c7C.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-                if(c7Cm.isVisible() && c7Cm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7C.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c7Cm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7C.setVisible(true);
-                    c7C.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c7Cm.isVisible()){
+            hideDots();
+            nextPlace = "2:6";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c7C.getFill().equals(Color.YELLOW) && c7C.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
 
     }
     public void button7E(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 7){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("D") && field1.getNumber() == 8){
-                                        c8Dm.setVisible(true);
-                                        c7Em.setVisible(true);
-                                        c7Em.setFill(Color.YELLOW);
-                                        c7E.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c7E.getFill().equals(Color.YELLOW)){
+            int[] field = {4,6};
+            if(whitePieces.get("4:6").isKing()){
+                previousPlace = "4:6k";
+            }else{
+                previousPlace = "4:6";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("F") && field2.getNumber() == 8){
-                                        c8Fm.setVisible(true);
-                                        c7Em.setVisible(true);
-                                        c7Em.setFill(Color.YELLOW);
-                                        c7E.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-                if(c7Em.isVisible() && c7Em.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7E.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c7Em.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7E.setVisible(true);
-                    c7E.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c7Em.isVisible()){
+            hideDots();
+            nextPlace = "4:6";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c7E.getFill().equals(Color.YELLOW) && c7E.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
 
     }
     public void button7G(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 7){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("H") && field1.getNumber() == 8){
-                                        c8Hm.setVisible(true);
-                                        c7Gm.setVisible(true);
-                                        c7Gm.setFill(Color.YELLOW);
-                                        c7G.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c7G.getFill().equals(Color.YELLOW)){
+            int[] field = {6,6};
+            if(whitePieces.get("6:6").isKing()){
+                previousPlace = "6:6k";
+            }else{
+                previousPlace = "6:6";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("F") && field2.getNumber() == 8){
-                                        c8Fm.setVisible(true);
-                                        c7Gm.setVisible(true);
-                                        c7Gm.setFill(Color.YELLOW);
-                                        c7G.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-                if(c7Gm.isVisible() && c7Gm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7G.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c7Gm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 7){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c7G.setVisible(true);
-                    c7G.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c7Gm.isVisible()){
+            hideDots();
+            nextPlace = "6:6";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c7G.getFill().equals(Color.YELLOW) && c7G.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
     }
     // 6
     public void button6B(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 6){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 7){
-                                        c7Cm.setVisible(true);
-                                        c6Bm.setVisible(true);
-                                        c6Bm.setFill(Color.YELLOW);
-                                        c6B.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c6B.getFill().equals(Color.YELLOW)){
+            int[] field = {1,5};
+            if(whitePieces.get("1:5").isKing()){
+                previousPlace = "1:5k";
+            }else{
+                previousPlace = "1:5";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("A") && field2.getNumber() == 7){
-                                        c7Am.setVisible(true);
-                                        c6Bm.setVisible(true);
-                                        c6Bm.setFill(Color.YELLOW);
-                                        c6B.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 8) {
-                                                c8Dm.setVisible(true);
-                                                c6Bm.setVisible(true);
-                                                c6Bm.setFill(Color.YELLOW);
-                                                c6B.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-
-
-                                }}}}}
-            } else {
-                if(c6Bm.isVisible() && c6Bm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6B.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c6Bm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6B.setVisible(true);
-                    c6B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c6Bm.isVisible()){
+            hideDots();
+            nextPlace = "1:5";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c6B.getFill().equals(Color.YELLOW) && c6B.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
     }
     public void button6D(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 6){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 7){
-                                        c7Cm.setVisible(true);
-                                        c6Dm.setVisible(true);
-                                        c6Dm.setFill(Color.YELLOW);
-                                        c6D.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c6D.getFill().equals(Color.YELLOW)){
+            int[] field = {3,5};
+            if(whitePieces.get("3:5").isKing()){
+                previousPlace = "3:5k";
+            }else{
+                previousPlace = "3:5";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 7){
-                                        c7Em.setVisible(true);
-                                        c6Dm.setVisible(true);
-                                        c6Dm.setFill(Color.YELLOW);
-                                        c6D.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("B") && field4.getNumber() == 8) {
-                                                c8Bm.setVisible(true);
-                                                c6Dm.setVisible(true);
-                                                c6Dm.setFill(Color.YELLOW);
-                                                c6D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 8) {
-                                                c8Fm.setVisible(true);
-                                                c6Dm.setVisible(true);
-                                                c6Dm.setFill(Color.YELLOW);
-                                                c6D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-
-
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-                if(c6Dm.isVisible() && c6Dm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6D.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c6Dm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6D.setVisible(true);
-                    c6D.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c6Dm.isVisible()){
+            hideDots();
+            nextPlace = "3:5";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c6D.getFill().equals(Color.YELLOW) && c6D.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
 
     }
     public void button6F(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 6){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 7){
-                                        c7Gm.setVisible(true);
-                                        c6Fm.setVisible(true);
-                                        c6Fm.setFill(Color.YELLOW);
-                                        c6F.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c6F.getFill().equals(Color.YELLOW)){
+            int[] field = {5,5};
+            if(whitePieces.get("5:5").isKing()){
+                previousPlace = "5:5k";
+            }else{
+                previousPlace = "5:5";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 7){
-                                        c7Em.setVisible(true);
-                                        c6Fm.setVisible(true);
-                                        c6Fm.setFill(Color.YELLOW);
-                                        c6F.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 8) {
-                                                c8Dm.setVisible(true);
-                                                c6Fm.setVisible(true);
-                                                c6Fm.setFill(Color.YELLOW);
-                                                c6F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("H") && field4.getNumber() == 8) {
-                                                c8Hm.setVisible(true);
-                                                c6Fm.setVisible(true);
-                                                c6Fm.setFill(Color.YELLOW);
-                                                c6F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-
-                if(c6Fm.isVisible() && c6Fm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6F.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c6Fm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6F.setVisible(true);
-                    c6F.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c6Fm.isVisible()){
+            hideDots();
+            nextPlace = "5:5";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c6F.getFill().equals(Color.YELLOW) && c6F.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
 
     }
     public void button6H(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 6){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 7){
-                                        c7Gm.setVisible(true);
-                                        c6Hm.setVisible(true);
-                                        c6Hm.setFill(Color.YELLOW);
-                                        c6H.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 7 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 8) {
-                                                c8Fm.setVisible(true);
-                                                c6Hm.setVisible(true);
-                                                c6Hm.setFill(Color.YELLOW);
-                                                c6H.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(7);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
+        if(!clicked && c6H.getFill().equals(Color.YELLOW)){
+            int[] field = {7,5};
+            if(whitePieces.get("7:5").isKing()){
+                previousPlace = "7:5k";
+            }else{
+                previousPlace = "7:5";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-
-                if(c6Hm.isVisible() && c6Hm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c6H.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c6Hm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 6){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c6H.setVisible(true);
-                    c6H.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c6Hm.isVisible()){
+            hideDots();
+            nextPlace = "7:5";
+            playerMove(previousPlace ,nextPlace);
+            if(turn == false) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c6H.getFill().equals(Color.YELLOW) && c6H.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     // 5
     public void button5A(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 5){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                   // System.out.println("tutaj 0");
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 6){
-                                        c6Bm.setVisible(true);
-                                        c5Am.setVisible(true);
-                                        c5Am.setFill(Color.YELLOW);
-                                        c5A.setVisible(false);
-                                        clicked = true;
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
+        if(!clicked && c5A.getFill().equals(Color.YELLOW)){
+            int[] field = {0,4};
+            if(whitePieces.get("0:4").isKing()){
+                previousPlace = "0:4k";
+            }else{
+                previousPlace = "0:4";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                    }
-                                    if(field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 6 && field1.getMembership().equals("bot")){
-                                        for (FieldInfo field3 : gameInfo.gameList) {
-                                            if (!field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 7){
-                                                c7Cm.setVisible(true);
-                                                c5Am.setVisible(true);
-                                                c5Am.setFill(Color.YELLOW);
-                                                c5A.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-
-                if(c5Am.isVisible() && c5Am.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c5A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c5Am.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c5A.setVisible(true);
-                    c5A.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c5Am.isVisible()){
+            hideDots();
+            nextPlace = "0:4";
+            playerMove(previousPlace ,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c5A.getFill().equals(Color.YELLOW) && c5A.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button5C(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 5){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 6){
-                                        c6Bm.setVisible(true);
-                                        c5Cm.setVisible(true);
-                                        c5Cm.setFill(Color.YELLOW);
-                                        c5C.setVisible(false);
-                                        clicked = true;
+        if(!clicked && c5C.getFill().equals(Color.YELLOW)){
+            int[] field = {2,4};
+            if(whitePieces.get("2:4").isKing()){
+                previousPlace = "2:4k";
+            }else{
+                previousPlace = "2:4";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("D") && field2.getNumber() == 6){
-                                        c6Dm.setVisible(true);
-                                        c5Cm.setVisible(true);
-                                        c5Cm.setFill(Color.YELLOW);
-                                        c5C.setVisible(false);
-                                        clicked = true;
-
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-
-                                for (FieldInfo field4 : gameInfo.gameList) {
-                                    if (field4.isOccupation() && field4.getLetter().equals("B") && field4.getNumber() == 6 && field4.getMembership().equals("bot")) {
-                                        for (FieldInfo field5 : gameInfo.gameList) {
-                                            if (!field5.isOccupation() && field5.getLetter().equals("A") && field5.getNumber() == 7) {
-                                                c7Am.setVisible(true);
-                                                c5Cm.setVisible(true);
-                                                c5Cm.setFill(Color.YELLOW);
-                                                c5C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 6 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 7) {
-                                                c7Em.setVisible(true);
-                                                c5Cm.setVisible(true);
-                                                c5Cm.setFill(Color.YELLOW);
-                                                c5C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-
-                if(c5Cm.isVisible() && c5Cm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c5C.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c5Cm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c5C.setVisible(true);
-                    c5C.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c5Cm.isVisible()){
+            hideDots();
+            nextPlace = "2:4";
+            playerMove(previousPlace ,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c5C.getFill().equals(Color.YELLOW) && c5C.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button5E(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 5){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("F") && field1.getNumber() == 6){
-                                        c6Fm.setVisible(true);
-                                        c5Em.setVisible(true);
-                                        c5Em.setFill(Color.YELLOW);
-                                        c5E.setVisible(false);
-                                        clicked = true;
+        if(!clicked && c5E.getFill().equals(Color.YELLOW)){
+            int[] field = {4,4};
+            if(whitePieces.get("4:4").isKing()){
+                previousPlace = "4:4k";
+            }else{
+                previousPlace = "4:4";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("D") && field2.getNumber() == 6){
-                                        c6Dm.setVisible(true);
-                                        c5Em.setVisible(true);
-                                        c5Em.setFill(Color.YELLOW);
-                                        c5E.setVisible(false);
-                                        clicked = true;
-
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 6 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("C") && field4.getNumber() == 7) {
-                                                c7Cm.setVisible(true);
-                                                c5Em.setVisible(true);
-                                                c5Em.setFill(Color.YELLOW);
-                                                c5E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 6 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("G") && field4.getNumber() == 7) {
-                                                c7Gm.setVisible(true);
-                                                c5Em.setVisible(true);
-                                                c5Em.setFill(Color.YELLOW);
-                                                c5E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-
-                if(c5Em.isVisible() && c5Em.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c5E.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c5Em.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c5E.setVisible(true);
-                    c5E.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c5Em.isVisible()){
+            hideDots();
+            nextPlace = "4:4";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c5E.getFill().equals(Color.YELLOW) && c5E.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button5G(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 5){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("F") && field1.getNumber() == 6){
-                                        c6Fm.setVisible(true);
-                                        c5Gm.setVisible(true);
-                                        c5Gm.setFill(Color.YELLOW);
-                                        c5G.setVisible(false);
-                                        clicked = true;
+        if(!clicked && c5G.getFill().equals(Color.YELLOW)){
+            int[] field = {6,4};
+            if(whitePieces.get("6:4").isKing()){
+                previousPlace = "6:4k";
+            }else{
+                previousPlace = "6:4";
+            }
+            showMovementPlaces(field);
+            clicked = true;
 
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("H") && field2.getNumber() == 6){
-                                        c6Hm.setVisible(true);
-                                        c5Gm.setVisible(true);
-                                        c5Gm.setFill(Color.YELLOW);
-                                        c5G.setVisible(false);
-                                        clicked = true;
-
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 6 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 7) {
-                                                c7Em.setVisible(true);
-                                                c5Gm.setVisible(true);
-                                                c5Gm.setFill(Color.YELLOW);
-                                                c5G.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(6);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-                    }
-
-                }
-
-            } else {
-
-                if(c5Gm.isVisible() && c5Gm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c5G.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c5Gm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 5){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c5G.setVisible(true);
-                    c5G.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        }else if(clicked && c5Gm.isVisible()){
+            hideDots();
+            nextPlace = "6:4";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c5G.getFill().equals(Color.YELLOW) && c5G.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     // 4
     public void button4B(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 4){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 5){
-                                        c5Cm.setVisible(true);
-                                        c4Bm.setVisible(true);
-                                        c4Bm.setFill(Color.YELLOW);
-                                        c4B.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("B");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("A") && field2.getNumber() == 5){
-                                        c5Am.setVisible(true);
-                                        c4Bm.setVisible(true);
-                                        c4Bm.setFill(Color.YELLOW);
-                                        c4B.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("B");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");}
-
-
-                                    }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 6) {
-                                                c6Dm.setVisible(true);
-                                                c4Bm.setVisible(true);
-                                                c4Bm.setFill(Color.YELLOW);
-                                                c4B.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                }
-                            }
-                        }
-
-                    }
-
-
-
-
-
-            } else {
-                if(c4Bm.isVisible() && c4Bm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4B.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c4Bm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4B.setVisible(true);
-                    c4B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        if(!clicked && c4B.getFill().equals(Color.YELLOW)){
+            int[] field = {1,3};
+            if(whitePieces.get("1:3").isKing()){
+                previousPlace = "1:3k";
+            }else{
+                previousPlace = "1:3";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c4Bm.isVisible()){
+            hideDots();
+            nextPlace = "1:3";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+
+        }else if(clicked && c4B.getFill().equals(Color.YELLOW) && c4B.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
 
+        }
     public void button4D(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 4){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 5){
-                                        c5Cm.setVisible(true);
-                                        c4Dm.setVisible(true);
-                                        c4Dm.setFill(Color.YELLOW);
-                                        c4D.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("D");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 5){
-                                        c5Em.setVisible(true);
-                                        c4Dm.setVisible(true);
-                                        c4Dm.setFill(Color.YELLOW);
-                                        c4D.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("D");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("B") && field4.getNumber() == 6) {
-                                                c6Bm.setVisible(true);
-                                                c4Dm.setVisible(true);
-                                                c4Dm.setFill(Color.YELLOW);
-                                                c4D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 6) {
-                                                c6Fm.setVisible(true);
-                                                c4Dm.setVisible(true);
-                                                c4Dm.setFill(Color.YELLOW);
-                                                c4D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c4Dm.isVisible() && c4Dm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4D.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c4Dm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4D.setVisible(true);
-                    c4D.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c4D.getFill().equals(Color.YELLOW)){
+            int[] field = {3,3};
+            if(whitePieces.get("3:3").isKing()){
+                previousPlace = "3:3k";
+            }else{
+                previousPlace = "3:3";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c4Dm.isVisible()){
+            hideDots();
+            nextPlace = "3:3";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c4D.getFill().equals(Color.YELLOW) && c4D.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button4F(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 4){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 5){
-                                        c5Gm.setVisible(true);
-                                        c4Fm.setVisible(true);
-                                        c4Fm.setFill(Color.YELLOW);
-                                        c4F.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("F");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 5){
-                                        c5Em.setVisible(true);
-                                        c4Fm.setVisible(true);
-                                        c4Fm.setFill(Color.YELLOW);
-                                        c4F.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("F");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 6) {
-                                                c6Dm.setVisible(true);
-                                                c4Fm.setVisible(true);
-                                                c4Fm.setFill(Color.YELLOW);
-                                                c4F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("H") && field4.getNumber() == 6) {
-                                                c6Hm.setVisible(true);
-                                                c4Fm.setVisible(true);
-                                                c4Fm.setFill(Color.YELLOW);
-                                                c4F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c4Fm.isVisible() && c4Fm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4F.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c4Fm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4F.setVisible(true);
-                    c4F.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c4F.getFill().equals(Color.YELLOW)){
+            int[] field = {5,3};
+            if(whitePieces.get("5:3").isKing()){
+                previousPlace = "5:3k";
+            }else{
+                previousPlace = "5:3";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c4Fm.isVisible()){
+            hideDots();
+            nextPlace = "5:3";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c4F.getFill().equals(Color.YELLOW) && c4F.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button4H(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 4){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 5){
-                                        c5Gm.setVisible(true);
-                                        c4Hm.setVisible(true);
-                                        c4Hm.setFill(Color.YELLOW);
-                                        c4H.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("H");
-                                        playerField.setNumber(4);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 5 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 6) {
-                                                c6Fm.setVisible(true);
-                                                c4Hm.setVisible(true);
-                                                c4Hm.setFill(Color.YELLOW);
-                                                c4H.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(5);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c4Hm.isVisible() && c4Hm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4H.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c4Hm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 4){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c4H.setVisible(true);
-                    c4H.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c4H.getFill().equals(Color.YELLOW)){
+            int[] field = {7,3};
+            if(whitePieces.get("7:3").isKing()){
+                previousPlace = "7:3k";
+            }else{
+                previousPlace = "7:3";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c4Hm.isVisible()){
+            hideDots();
+            nextPlace = "7:3";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c4H.getFill().equals(Color.YELLOW) && c4H.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     // 3
     public void button3A(ActionEvent event){
-
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Am.setVisible(true);
-                                        c3Am.setFill(Color.YELLOW);
-                                        c3A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("B") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("C") && field4.getNumber() == 5) {
-                                                c5Cm.setVisible(true);
-                                                c3Am.setVisible(true);
-                                                c3Am.setFill(Color.YELLOW);
-                                                c3A.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-            } else {
-                if(c3Am.isVisible() && c3Am.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c3A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-            }else if(c3Am.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c3A.setVisible(true);
-                    c3A.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c3A.getFill().equals(Color.YELLOW)){
+            int[] field = {0,2};
+            if(whitePieces.get("0:2").isKing()){
+                previousPlace = "0:2k";
+            }else{
+                previousPlace = "0:2";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c3Am.isVisible()){
+            hideDots();
+            nextPlace = "0:2";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c3A.getFill().equals(Color.YELLOW) && c3A.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
+
     }
     public void button3C(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("D") && field1.getNumber() == 4){
-                                        c4Dm.setVisible(true);
-                                        c3Cm.setVisible(true);
-                                        c3Cm.setFill(Color.YELLOW);
-                                        c3C.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("C");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-                                    }
-                                }
-
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("B") && field2.getNumber() == 4){
-                                        c4Bm.setVisible(true);
-                                        c3Cm.setVisible(true);
-                                        c3Cm.setFill(Color.YELLOW);
-                                        c3C.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("C");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                       }
-
-
-                                    }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("B") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("A") && field4.getNumber() == 5) {
-                                                c5Am.setVisible(true);
-                                                c3Cm.setVisible(true);
-                                                c3Cm.setFill(Color.YELLOW);
-                                                c3C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 5) {
-                                                c5Em.setVisible(true);
-                                                c3Cm.setVisible(true);
-                                                c3Cm.setFill(Color.YELLOW);
-                                                c3C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                }
-                            }
-                        }
-
-                    }
-
-
-
-
-
-            } else {
-
-                if(c3Cm.isVisible() && c3Cm.getFill().equals(Color.YELLOW)){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-
-                    c3C.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }if(c3Cm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c3C.setVisible(true);
-                    c3C.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }}
+        if(!clicked && c3C.getFill().equals(Color.YELLOW)){
+            int[] field = {2,2};
+            if(whitePieces.get("2:2").isKing()){
+                previousPlace = "2:2k";
+            }else{
+                previousPlace = "2:2";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c3Cm.isVisible()){
+            hideDots();
+            nextPlace = "2:2";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c3C.getFill().equals(Color.YELLOW) && c3C.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
-
+    }
     public void button3E(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("D") && field1.getNumber() == 4){
-                                        c4Dm.setVisible(true);
-                                        c3Em.setVisible(true);
-                                        c3Em.setFill(Color.YELLOW);
-                                        c3E.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("E");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("F") && field2.getNumber() == 4){
-                                        c4Fm.setVisible(true);
-                                        c3Em.setVisible(true);
-                                        c3Em.setFill(Color.YELLOW);
-                                        c3E.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("E");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("C") && field4.getNumber() == 5) {
-                                                c5Cm.setVisible(true);
-                                                c3Em.setVisible(true);
-                                                c3Em.setFill(Color.YELLOW);
-                                                c3E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("G") && field4.getNumber() == 5) {
-                                                c5Gm.setVisible(true);
-                                                c3Em.setVisible(true);
-                                                c3Em.setFill(Color.YELLOW);
-                                                c3E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c3Em.isVisible() && c3Em.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c3E.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Em.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }}
-                    c3E.setVisible(true);
-                    c3E.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c3E.getFill().equals(Color.YELLOW)){
+            int[] field = {4,2};
+            if(whitePieces.get("4:2").isKing()){
+                previousPlace = "4:2k";
+            }else{
+                previousPlace = "4:2";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c3Em.isVisible()){
+            hideDots();
+            nextPlace = "4:2";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c3E.getFill().equals(Color.YELLOW) && c3E.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
 
     }
     public void button3G(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 3){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("H") && field1.getNumber() == 4){
-                                        c4Hm.setVisible(true);
-                                        c3Gm.setVisible(true);
-                                        c3Gm.setFill(Color.YELLOW);
-                                        c3G.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("G");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("F") && field2.getNumber() == 4){
-                                        c4Fm.setVisible(true);
-                                        c3Gm.setVisible(true);
-                                        c3Gm.setFill(Color.YELLOW);
-                                        c3G.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("G");
-                                        playerField.setNumber(3);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 4 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 5) {
-                                                c5Em.setVisible(true);
-                                                c3Gm.setVisible(true);
-                                                c3Gm.setFill(Color.YELLOW);
-                                                c3G.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(4);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c3Gm.isVisible() && c3Gm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c3G.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c3Gm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 3){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c3G.setVisible(true);
-                    c3G.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c3G.getFill().equals(Color.YELLOW)){
+            int[] field = {6,2};
+            if(whitePieces.get("6:2").isKing()){
+                previousPlace = "6:2k";
+            }else{
+                previousPlace = "6:2";
             }
-        }
+            showMovementPlaces(field);
+            clicked = true;
 
+        }else if(clicked && c3Gm.isVisible()){
+            hideDots();
+            nextPlace = "6:2";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c3G.getFill().equals(Color.YELLOW) && c3G.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
     }
     // 2
     public void button2B(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 2){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 3){
-                                        c3Cm.setVisible(true);
-                                        c2Bm.setVisible(true);
-                                        c2Bm.setFill(Color.YELLOW);
-                                        c2B.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("B");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("A") && field2.getNumber() == 3){
-                                        c3Am.setVisible(true);
-                                        c2Bm.setVisible(true);
-                                        c2Bm.setFill(Color.YELLOW);
-                                        c2B.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("B");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 4) {
-                                                c4Dm.setVisible(true);
-                                                c2Bm.setVisible(true);
-                                                c2Bm.setFill(Color.YELLOW);
-                                                c2B.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c2Bm.isVisible() && c2Bm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2B.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c2Bm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("B") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2B.setVisible(true);
-                    c2B.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c2B.getFill().equals(Color.YELLOW)){
+            int[] field = {1,1};
+            if(whitePieces.get("1:1").isKing()){
+                previousPlace = "1:1k";
+            }else{
+                previousPlace = "1:1";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c2Bm.isVisible()){
+            hideDots();
+            nextPlace = "1:1";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c2B.getFill().equals(Color.YELLOW) && c2B.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button2D(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 2){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("C") && field1.getNumber() == 3){
-                                        c3Cm.setVisible(true);
-                                        c2Dm.setVisible(true);
-                                        c2Dm.setFill(Color.YELLOW);
-                                        c2D.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("D");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 3){
-                                        c3Em.setVisible(true);
-                                        c2Dm.setVisible(true);
-                                        c2Dm.setFill(Color.YELLOW);
-                                        c2D.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("D");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("C") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("B") && field4.getNumber() == 4) {
-                                                c4Bm.setVisible(true);
-                                                c2Dm.setVisible(true);
-                                                c2Dm.setFill(Color.YELLOW);
-                                                c2D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("C");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 4) {
-                                                c4Fm.setVisible(true);
-                                                c2Dm.setVisible(true);
-                                                c2Dm.setFill(Color.YELLOW);
-                                                c2D.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c2Dm.isVisible() && c2Dm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2D.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c2Dm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("D") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2D.setVisible(true);
-                    c2D.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c2D.getFill().equals(Color.YELLOW)){
+            int[] field = {3,1};
+            if(whitePieces.get("3:1").isKing()){
+                previousPlace = "3:1k";
+            }else{
+                previousPlace = "3:1";
             }
-        }
+            showMovementPlaces(field);
+            clicked = true;
 
+        }else if(clicked && c2Dm.isVisible()){
+            hideDots();
+            nextPlace = "3:1";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c2D.getFill().equals(Color.YELLOW) && c2D.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
     }
     public void button2F(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 2){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 3){
-                                        c3Gm.setVisible(true);
-                                        c2Fm.setVisible(true);
-                                        c2Fm.setFill(Color.YELLOW);
-                                        c2F.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("F");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("E") && field2.getNumber() == 3){
-                                        c3Em.setVisible(true);
-                                        c2Fm.setVisible(true);
-                                        c2Fm.setFill(Color.YELLOW);
-                                        c2F.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("F");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("E") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("D") && field4.getNumber() == 4) {
-                                                c4Dm.setVisible(true);
-                                                c2Fm.setVisible(true);
-                                                c2Fm.setFill(Color.YELLOW);
-                                                c2F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("E");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("H") && field4.getNumber() == 4) {
-                                                c4Hm.setVisible(true);
-                                                c2Fm.setVisible(true);
-                                                c2Fm.setFill(Color.YELLOW);
-                                                c2F.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c2Fm.isVisible() && c2Fm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2F.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c2Fm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("F") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2F.setVisible(true);
-                    c2F.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c2F.getFill().equals(Color.YELLOW)){
+            int[] field = {5,1};
+            if(whitePieces.get("5:1").isKing()){
+                previousPlace = "5:1k";
+            }else{
+                previousPlace = "5:1";
             }
-        }
+            showMovementPlaces(field);
+            clicked = true;
 
+        }else if(clicked && c2Fm.isVisible()){
+            hideDots();
+            nextPlace = "5:1";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c2F.getFill().equals(Color.YELLOW) && c2F.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
     }
     public void button2H(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 2){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("G") && field1.getNumber() == 3){
-                                        c3Gm.setVisible(true);
-                                        c2Hm.setVisible(true);
-                                        c2Hm.setFill(Color.YELLOW);
-                                        c2H.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("H");
-                                        playerField.setNumber(2);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("G") && field3.getNumber() == 3 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("F") && field4.getNumber() == 4) {
-                                                c4Fm.setVisible(true);
-                                                c2Hm.setVisible(true);
-                                                c2Hm.setFill(Color.YELLOW);
-                                                c2H.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("G");
-                                                removeField.setNumber(3);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c2Hm.isVisible() && c2Hm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2H.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c2Hm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("H") && field.getNumber() == 2){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c2H.setVisible(true);
-                    c2H.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c2H.getFill().equals(Color.YELLOW)){
+            int[] field = {7,1};
+            if(whitePieces.get("7:1").isKing()){
+                previousPlace = "7:1k";
+            }else{
+                previousPlace = "7:1";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c2Hm.isVisible()){
+            hideDots();
+            nextPlace = "7:1";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c2H.getFill().equals(Color.YELLOW) && c2H.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
-    // 1
+
     public void button1A(ActionEvent event){
-        if (gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 1){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 2){
-                                        c2Bm.setVisible(true);
-                                        c1Am.setVisible(true);
-                                        c1Am.setFill(Color.YELLOW);
-                                        c1A.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("A");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("B") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("C") && field4.getNumber() == 3) {
-                                                c3Cm.setVisible(true);
-                                                c1Am.setVisible(true);
-                                                c1Am.setFill(Color.YELLOW);
-                                                c1A.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-
-
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c1Am.isVisible() && c1Am.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1A.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c1Am.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("A") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1A.setVisible(true);
-                    c1A.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c1A.getFill().equals(Color.YELLOW)){
+            int[] field = {0,0};
+            if(whitePieces.get("0:0").isKing()){
+                previousPlace = "0:0k";
+            }else{
+                previousPlace = "0:0";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c1Am.isVisible()){
+            hideDots();
+            nextPlace = "0:0";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c1A.getFill().equals(Color.YELLOW) && c1A.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button1C(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 1){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("B") && field1.getNumber() == 2){
-                                        c2Bm.setVisible(true);
-                                        c1Cm.setVisible(true);
-                                        c1Cm.setFill(Color.YELLOW);
-                                        c1C.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("C");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("D") && field2.getNumber() == 2){
-                                        c2Dm.setVisible(true);
-                                        c1Cm.setVisible(true);
-                                        c1Cm.setFill(Color.YELLOW);
-                                        c1C.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("C");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("B") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("A") && field4.getNumber() == 3) {
-                                                c3Am.setVisible(true);
-                                                c1Cm.setVisible(true);
-                                                c1Cm.setFill(Color.YELLOW);
-                                                c1C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("B");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 3) {
-                                                c3Em.setVisible(true);
-                                                c1Cm.setVisible(true);
-                                                c1Cm.setFill(Color.YELLOW);
-                                                c1C.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c1Cm.isVisible() && c1Cm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1C.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c1Cm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("C") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1C.setVisible(true);
-                    c1C.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c1C.getFill().equals(Color.YELLOW)){
+            int[] field = {2,0};
+            if(whitePieces.get("2:0").isKing()){
+                previousPlace = "2:0k";
+            }else{
+                previousPlace = "2:0";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c1Cm.isVisible()){
+            hideDots();
+            nextPlace = "2:0";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c1C.getFill().equals(Color.YELLOW) && c1C.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
     public void button1E(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 1){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("F") && field1.getNumber() == 2){
-                                        c2Fm.setVisible(true);
-                                        c1Em.setVisible(true);
-                                        c1Em.setFill(Color.YELLOW);
-                                        c1E.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("E");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                    }
-                                }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("D") && field2.getNumber() == 2){
-                                        c2Dm.setVisible(true);
-                                        c1Em.setVisible(true);
-                                        c1Em.setFill(Color.YELLOW);
-                                        c1E.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("E");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("D") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("C") && field4.getNumber() == 3) {
-                                                c3Cm.setVisible(true);
-                                                c1Em.setVisible(true);
-                                                c1Em.setFill(Color.YELLOW);
-                                                c1E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("D");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("G") && field4.getNumber() == 3) {
-                                                c3Gm.setVisible(true);
-                                                c1Em.setVisible(true);
-                                                c1Em.setFill(Color.YELLOW);
-                                                c1E.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-
-
-
-            } else {
-                if(c1Em.isVisible() && c1Em.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1E.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c1Em.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("E") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1E.setVisible(true);
-                    c1E.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c1E.getFill().equals(Color.YELLOW)){
+            int[] field = {4,0};
+            if(whitePieces.get("4:0").isKing()){
+                previousPlace = "4:0k";
+            }else{
+                previousPlace = "4:0";
             }
-        }
+            showMovementPlaces(field);
+            clicked = true;
 
+        }else if(clicked && c1Em.isVisible()){
+            hideDots();
+            nextPlace = "4:0";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c1E.getFill().equals(Color.YELLOW) && c1E.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
+        }
     }
     public void button1G(ActionEvent event){
-        if ( gameStarted){
-            if (!clicked){
-                for (FieldInfo field : gameInfo.gameList) {
-                    if (field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 1){
-                        if (field.getStatus().equals("pawn")){
-                            if(field.getMembership().equals("player")){
-                                for (FieldInfo field1 : gameInfo.gameList) {
-                                    if(!field1.isOccupation() && field1.getLetter().equals("F") && field1.getNumber() == 2){
-                                        c2Fm.setVisible(true);
-                                        c1Gm.setVisible(true);
-                                        c1Gm.setFill(Color.YELLOW);
-                                        c1G.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("G");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-                                        }
-                                    }
-                                for (FieldInfo field2 : gameInfo.gameList) {
-                                    if(!field2.isOccupation() && field2.getLetter().equals("H") && field2.getNumber() == 2){
-                                        c2Hm.setVisible(true);
-                                        c1Gm.setVisible(true);
-                                        c1Gm.setFill(Color.YELLOW);
-                                        c1G.setVisible(false);
-                                        clicked = true;
-
-                                        playerField.setLetter("G");
-                                        playerField.setNumber(1);
-                                        playerField.setMembership("player");
-                                        playerField.setOccupation(true);
-                                        playerField.setStatus("pawn");
-                                        field.setStatus("");
-                                        field.setOccupation(false);
-                                        field.setMembership("none");
-
-
-                                    }
-
-                                }
-                                for (FieldInfo field3 : gameInfo.gameList) {
-                                    if (field3.isOccupation() && field3.getLetter().equals("F") && field3.getNumber() == 2 && field3.getMembership().equals("bot")) {
-                                        for (FieldInfo field4 : gameInfo.gameList) {
-                                            if (!field4.isOccupation() && field4.getLetter().equals("E") && field4.getNumber() == 3) {
-                                                c3Em.setVisible(true);
-                                                c1Gm.setVisible(true);
-                                                c1Gm.setFill(Color.YELLOW);
-                                                c1G.setVisible(false);
-                                                clicked = true;
-                                                field.setStatus("");
-                                                field.setOccupation(false);
-                                                field.setMembership("none");
-                                                removeField.setLetter("F");
-                                                removeField.setNumber(2);
-                                                removeField.setOccupation(true);
-                                                removeField.setStatus("pawn");
-                                                removeField.setMembership("bot");
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-            } else {
-                if(c1Gm.isVisible() && c1Gm.getFill() == Color.YELLOW){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1G.setVisible(true);
-                    hideDots();
-                    clicked = false;
-                }else if(c1Gm.isVisible()){
-                    for (FieldInfo field : gameInfo.gameList) {
-                        if(!field.isOccupation() && field.getLetter().equals("G") && field.getNumber() == 1){
-                            field.setStatus("pawn");
-                            field.setOccupation(true);
-                            field.setMembership("player");
-                        }
-                    }
-                    c1G.setVisible(true);
-                    c1G.setFill(playerColor);
-                    hideDots();
-                    clicked = false;
-                    removeFigures(removeField);
-                    removeVisible();
-                }
+        if(!clicked && c1G.getFill().equals(Color.YELLOW)){
+            int[] field = {6,0};
+            if(whitePieces.get("6:0").isKing()){
+                previousPlace = "6:0k";
+            }else{
+                previousPlace = "6:0";
             }
+            showMovementPlaces(field);
+            clicked = true;
+
+        }else if(clicked && c1Gm.isVisible()){
+            hideDots();
+            nextPlace = "6:0";
+            playerMove(previousPlace,nextPlace);
+            if(!turn) {
+                aiMove();
+                showPlayerMovements();
+                clicked = false;
+            }
+        }else if(clicked && c1G.getFill().equals(Color.YELLOW) && c1G.isVisible()){
+            hideDots();
+            showPlayerMovements();
+            clicked = false;
         }
     }
 
     public void hideDots(){
-        c4Bm.setVisible(false);
         c8Bm.setVisible(false);
         c8Dm.setVisible(false);
         c8Fm.setVisible(false);
@@ -3352,7 +1062,7 @@ public class Controller1 {
         c1Gm.setVisible(false);
 
 
-        c4Bm.setFill(Color.BLUE);
+
         c8Bm.setFill(Color.BLUE);
         c8Dm.setFill(Color.BLUE);
         c8Fm.setFill(Color.BLUE);
@@ -3388,68 +1098,763 @@ public class Controller1 {
 
     }
 
-    public void removeFigures(FieldInfo fieldToRemove){
-        for (FieldInfo field : gameInfo.gameList) {
-            if(field.isOccupation() == fieldToRemove.isOccupation() && field.getLetter().equals(fieldToRemove.getLetter()) && field.getNumber() == fieldToRemove.getNumber()){
-                field.setStatus("");
-                field.setOccupation(false);
-                field.setMembership("none");
-                removeField.setLetter("");
-                removeField.setNumber(0);
-                removeField.setMembership("");
-                removeField.setOccupation(false);
-                removeField.setStatus("");
 
+    public void aiMove(){
+
+        ai.moveAI(whitePieces,redPieces);
+        redPieces = ai.getFinalRedPieces();
+        whitePieces = ai.getFinalWhitePieces();
+        ai.finalRefresh();
+        hideAllPieces();
+        setBoardAfterLoad();
+        turn = true;
+    }
+
+
+
+    public void playerMove(String prev,String next){
+
+        if(jumpleMove){
+            whitePieces.remove(prev);
+            removeAfterJump(prev, next);
+            if(prev.length() == 4){
+                whitePieces.put(next.substring(0, 3), new Piece(true));
+            }else{
+                whitePieces.put(next, new Piece());
+            }
+            hideAllPieces();
+            setBoardAfterLoad();
+            List<String[]> nextJumps = checkMultiMove(next);
+            if(!nextJumps.isEmpty()){
+                setRingsMovementsJump(nextJumps, utility.getXY(next));
+            }else{
+                turn = false;
+            }
+        }else{
+            whitePieces.remove(prev);
+            if(prev.length() == 4){
+                whitePieces.put(next.substring(0, 3), new Piece(true));
+            }else{
+                whitePieces.put(next, new Piece());
+            }
+            hideAllPieces();
+            setBoardAfterLoad();
+            jumpleMove = false;
+            turn = false;
+        }
+    }
+    public void showMovementPlaces(int[] field){
+
+        List<String[]> simpleMoves = utility.getSimpleMoves();
+        List<String[]> jumpMoves = utility.getJumpMoves();
+
+        if(!jumpMoves.isEmpty()){
+            setRingsMovementsJump(jumpMoves,field);
+
+        }else{
+            setRingsMovementsSimple(simpleMoves,field);
+        }
+    }
+    public void showPlayerMovements(){
+
+        utility.clearMoves();
+
+        for (String moveKey : getWhitePieces().keySet()) {
+            utility.successor(moveKey, getWhitePieces(), getRedPieces(), true);
+        }
+        List<String[]> simpleMoves = utility.getSimpleMoves();
+        List<String[]> jumpMoves = utility.getJumpMoves();
+
+        if (!jumpMoves.isEmpty()) {
+            setPossibleMovements(jumpMoves);
+
+        } else {
+            setPossibleMovements(simpleMoves);
+        }
+        if (whitePieces.size() == 0) {
+            System.out.println("Game Over!");
+        }
+        if (simpleMoves.isEmpty() && jumpMoves.isEmpty()) {
+            System.out.println("Game Over!");
+        }
+        System.out.println("test");
+    }
+    private void setPossibleMovements(List<String[]> moves) {
+
+       // clearBoard();
+
+        for (String[] move : moves) {
+            String key = move[1];
+            int[] xy = utility.getXY(key);
+            boolean king = whitePieces.get(key).isKing();
+
+
+                if (xy[0] == 1 && xy[1] == 7) c8B.setFill(Color.YELLOW);
+                if (xy[0] == 3 && xy[1] == 7) c8D.setFill(Color.YELLOW);
+                if (xy[0] == 5 && xy[1] == 7) c8F.setFill(Color.YELLOW);
+                if (xy[0] == 7 && xy[1] == 7) c8H.setFill(Color.YELLOW);
+
+                if (xy[0] == 0 && xy[1] == 6) c7A.setFill(Color.YELLOW);
+                if (xy[0] == 2 && xy[1] == 6) c7C.setFill(Color.YELLOW);
+                if (xy[0] == 4 && xy[1] == 6) c7E.setFill(Color.YELLOW);
+                if (xy[0] == 6 && xy[1] == 6) c7G.setFill(Color.YELLOW);
+
+                if (xy[0] == 1 && xy[1] == 5) c6B.setFill(Color.YELLOW);
+                if (xy[0] == 3 && xy[1] == 5) c6D.setFill(Color.YELLOW);
+                if (xy[0] == 5 && xy[1] == 5) c6F.setFill(Color.YELLOW);
+                if (xy[0] == 7 && xy[1] == 5) c6H.setFill(Color.YELLOW);
+
+                if (xy[0] == 0 && xy[1] == 4) c5A.setFill(Color.YELLOW);
+                if (xy[0] == 2 && xy[1] == 4) c5C.setFill(Color.YELLOW);
+                if (xy[0] == 4 && xy[1] == 4) c5E.setFill(Color.YELLOW);
+                if (xy[0] == 6 && xy[1] == 4) c5G.setFill(Color.YELLOW);
+
+                if (xy[0] == 1 && xy[1] == 3) c4B.setFill(Color.YELLOW);
+                if (xy[0] == 3 && xy[1] == 3) c4D.setFill(Color.YELLOW);
+                if (xy[0] == 5 && xy[1] == 3) c4F.setFill(Color.YELLOW);
+                if (xy[0] == 7 && xy[1] == 3) c4H.setFill(Color.YELLOW);
+
+                if (xy[0] == 0 && xy[1] == 2) c3A.setFill(Color.YELLOW);
+                if (xy[0] == 2 && xy[1] == 2) c3C.setFill(Color.YELLOW);
+                if (xy[0] == 4 && xy[1] == 2) c3E.setFill(Color.YELLOW);
+                if (xy[0] == 6 && xy[1] == 2) c3G.setFill(Color.YELLOW);
+
+                if (xy[0] == 1 && xy[1] == 1) c2B.setFill(Color.YELLOW);
+                if (xy[0] == 3 && xy[1] == 1) c2D.setFill(Color.YELLOW);
+                if (xy[0] == 5 && xy[1] == 1) c2F.setFill(Color.YELLOW);
+                if (xy[0] == 7 && xy[1] == 1) c2H.setFill(Color.YELLOW);
+
+                if (xy[0] == 0 && xy[1] == 0) c1A.setFill(Color.YELLOW);
+                if (xy[0] == 2 && xy[1] == 0) c1C.setFill(Color.YELLOW);
+                if (xy[0] == 4 && xy[1] == 0) c1E.setFill(Color.YELLOW);
+                if (xy[0] == 6 && xy[1] == 0) c1G.setFill(Color.YELLOW);
+        }
+
+
+    }
+    private void setRingsMovementsSimple(List<String[]> moves , int[] xyField) {
+
+        // clearBoard();
+        int[] xyRes = xyField;
+        for (String[] move : moves) {
+            String key = move[1];
+            String key1 = move[0];
+
+            int[] xy = utility.getXY(key1);
+            int[] xy1 = utility.getXY(key);
+            boolean king = whitePieces.get(key).isKing();
+
+            if (xy[0] == 1 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Gm.setVisible(true);
+        }
+
+
+    }
+    private void setRingsMovementsJump(List<String[]> moves , int[] xyField) {
+        jumpMovesToRemove = moves;
+        jumpleMove = true;
+        int[] xyRes = xyField;
+        for (String[] move : moves) {
+            String key = move[1];
+            String key1 = move[0];
+
+
+            int[] xy = utility.getXY(key1);
+            int[] xy1 = utility.getXY(key);
+           // boolean king = whitePieces.get(key).isKing();
+
+            if (xy[0] == 1 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 6 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c7Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 5 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c6Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 4 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c5Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 3 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c4Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 2 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c3Gm.setVisible(true);
+
+            if (xy[0] == 1 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Bm.setVisible(true);
+            if (xy[0] == 3 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Dm.setVisible(true);
+            if (xy[0] == 5 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Fm.setVisible(true);
+            if (xy[0] == 7 && xy[1] == 1 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c2Hm.setVisible(true);
+
+            if (xy[0] == 0 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Am.setVisible(true);
+            if (xy[0] == 2 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Cm.setVisible(true);
+            if (xy[0] == 4 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Em.setVisible(true);
+            if (xy[0] == 6 && xy[1] == 0 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c1Gm.setVisible(true);
+        }
+
+
+    }
+    public Map<String, Piece> getRedPieces() {
+        return redPieces;
+    }
+    public Map<String, Piece> getWhitePieces(){
+        return whitePieces;
+    }
+
+    public void save(ActionEvent event)throws FileNotFoundException {
+        boolean sureDo = false;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Save game");
+        alert.setHeaderText("You are saving the game you will lost your last save");
+        alert.setContentText("Are you sure you want to save?");
+        if(alert.showAndWait().get() == ButtonType.OK){
+          sureDo = true;
+            }
+        if(sureDo == true) {
+            try {
+
+                saveLoad.save(whitePieces, redPieces);
+            } catch (FileNotFoundException e) {
+                Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION);
+                alert1.setTitle("Error");
+                alert1.setHeaderText("File missing");
+                alert1.setContentText("There is problem with a file check if file save.txt is in resources");
+                if (alert1.showAndWait().get() == ButtonType.OK) {
+                }
+            }
+
+        }
+    }
+    public void laod(ActionEvent event)throws FileNotFoundException {
+        boolean sureDo = false;
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Load game");
+        alert.setHeaderText("You are loading last game you will lost this one");
+        alert.setContentText("Are you sure you want to save?");
+        if (alert.showAndWait().get() == ButtonType.OK) {
+            sureDo = true;
+        }
+        if(sureDo == true) {
+            try {
+                saveLoad.laod();
+                setWhitePieces(saveLoad.getWhiteMap());
+                setRedPieces(saveLoad.getRedMap());
+                setBoardAfterLoad();
+                clicked = false;
+                gameStarted = true;
+                hideDots();
+            } catch (FileNotFoundException e) {
+                Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION);
+                alert1.setTitle("Error");
+                alert1.setHeaderText("File missing");
+                alert1.setContentText("There is problem with a file check if file save.txt is in resources");
+                if (alert1.showAndWait().get() == ButtonType.OK) {
+                }
             }
         }
     }
-    public void removeVisible(){
-        for (FieldInfo field : gameInfo.gameList) {
-            if(c8B.isVisible() && !field.isOccupation() && field.getNumber() == 8 && field.getLetter().equals("B"))c8B.setVisible(false);
-            if(c8D.isVisible() && !field.isOccupation() && field.getNumber() == 8 && field.getLetter().equals("D"))c8D.setVisible(false);
-            if(c8F.isVisible() && !field.isOccupation() && field.getNumber() == 8 && field.getLetter().equals("F"))c8F.setVisible(false);
-            if(c8H.isVisible() && !field.isOccupation() && field.getNumber() == 8 && field.getLetter().equals("H"))c8H.setVisible(false);
 
-            if(c7A.isVisible() && !field.isOccupation() && field.getNumber() == 7 && field.getLetter().equals("A"))c7A.setVisible(false);
-            if(c7C.isVisible() && !field.isOccupation() && field.getNumber() == 7 && field.getLetter().equals("C"))c7C.setVisible(false);
-            if(c7E.isVisible() && !field.isOccupation() && field.getNumber() == 7 && field.getLetter().equals("E"))c7E.setVisible(false);
-            if(c7G.isVisible() && !field.isOccupation() && field.getNumber() == 7 && field.getLetter().equals("G"))c7G.setVisible(false);
+    public void setBoardAfterLoad(){
+        for (Map.Entry<String, Piece> entry :whitePieces.entrySet()) {
+        if(entry.getKey().equals("1:7")){
+            c8B.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c8B.setFill(Color.GRAY);
+            c8B.setVisible(true);
+        }
+        if(entry.getKey().equals("3:7")){
+            c8D.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c8D.setFill(Color.GRAY);
+            c8D.setVisible(true);
+            }
+        if(entry.getKey().equals("5:7")){
+            c8F.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c8F.setFill(Color.GRAY);
+            c8F.setVisible(true);
+            }
+        if(entry.getKey().equals("7:7")){
+            c8H.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c8H.setFill(Color.GRAY);
+            c8H.setVisible(true);
+            }
+        if(entry.getKey().equals("0:6")){
+            c7A.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c7A.setFill(Color.GRAY);
+            c7A.setVisible(true);
+            }
+        if(entry.getKey().equals("2:6")){
+            c7C.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c7C.setFill(Color.GRAY);
+            c7C.setVisible(true);
+            }
+        if(entry.getKey().equals("4:6")){
+            c7E.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c7E.setFill(Color.GRAY);
+            c7E.setVisible(true);
+            }
+        if(entry.getKey().equals("6:6")){
+            c7G.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c7G.setFill(Color.GRAY);
+            c7G.setVisible(true);
+            }
+        if(entry.getKey().equals("1:5")){
+            c6B.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c6B.setFill(Color.GRAY);
+            c6B.setVisible(true);
+            }
+        if(entry.getKey().equals("3:5")){
+            c6D.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c6D.setFill(Color.GRAY);
+            c6D.setVisible(true);
+            }
+        if(entry.getKey().equals("5:5")){
+            c6F.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c6F.setFill(Color.GRAY);
+            c6F.setVisible(true);
+            }
+        if(entry.getKey().equals("7:5")){
+            c6H.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c6H.setFill(Color.GRAY);
+            c6H.setVisible(true);
+            }
+        if(entry.getKey().equals("0:4")){
+            c5A.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c5A.setFill(Color.GRAY);
+            c5A.setVisible(true);
+            }
+        if(entry.getKey().equals("2:4")){
+            c5C.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c5C.setFill(Color.GRAY);
+            c5C.setVisible(true);
+            }
+        if(entry.getKey().equals("4:4")){
+            c5E.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c5E.setFill(Color.GRAY);
+            c5E.setVisible(true);
+            }
+        if(entry.getKey().equals("6:4")){
+            c5G.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c5G.setFill(Color.GRAY);
+            c5G.setVisible(true);
+            }
+        if(entry.getKey().equals("1:3")){
+                c4B.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c4B.setFill(Color.GRAY);
+                c4B.setVisible(true);
+            }
+        if(entry.getKey().equals("3:3")){
+                c4D.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c4D.setFill(Color.GRAY);
+                c4D.setVisible(true);
+            }
+        if(entry.getKey().equals("5:3")){
+                c4F.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c4F.setFill(Color.GRAY);
+                c4F.setVisible(true);
+            }
+        if(entry.getKey().equals("7:3")){
+                c4H.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c4H.setFill(Color.GRAY);
+                c4H.setVisible(true);
+            }
+        if(entry.getKey().equals("0:2")){
+                c3A.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c3A.setFill(Color.GRAY);
+                c3A.setVisible(true);
+            }
+        if(entry.getKey().equals("2:2")){
+                c3C.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c3C.setFill(Color.GRAY);
+                c3C.setVisible(true);
+            }
+        if(entry.getKey().equals("4:2")){
+                c3E.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c3E.setFill(Color.GRAY);
+                c3E.setVisible(true);
+            }
+        if(entry.getKey().equals("6:2")){
+                c3G.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c3G.setFill(Color.GRAY);
+                c3G.setVisible(true);
+            }
+        if(entry.getKey().equals("1:1")){
+                c2B.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c2B.setFill(Color.GRAY);
+                c2B.setVisible(true);
+            }
+        if(entry.getKey().equals("3:1")){
+                c2D.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c2D.setFill(Color.GRAY);
+                c2D.setVisible(true);
+            }
+        if(entry.getKey().equals("5:1")){
+                c2F.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c2F.setFill(Color.GRAY);
+                c2F.setVisible(true);
+            }
+        if(entry.getKey().equals("7:1")){
+                c2H.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c2H.setFill(Color.GRAY);
+                c2H.setVisible(true);
+            }
+        if(entry.getKey().equals("0:0")){
+                c1A.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c1A.setFill(Color.GRAY);
+                c1A.setVisible(true);
+            }
+        if(entry.getKey().equals("2:0")){
+                c1C.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c1C.setFill(Color.GRAY);
+                c1C.setVisible(true);
+            }
+        if(entry.getKey().equals("4:0")){
+                c1E.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c1E.setFill(Color.GRAY);
+                c1E.setVisible(true);
+            }
+        if(entry.getKey().equals("6:0")){
+                c1G.setFill(Color.WHITE);
+            if(entry.getValue().isKing() == true)c1G.setFill(Color.GRAY);
+                c1G.setVisible(true);
+            }
 
-            if(c6B.isVisible() && !field.isOccupation() && field.getNumber() == 6 && field.getLetter().equals("B"))c6B.setVisible(false);
-            if(c6D.isVisible() && !field.isOccupation() && field.getNumber() == 6 && field.getLetter().equals("D"))c6D.setVisible(false);
-            if(c6F.isVisible() && !field.isOccupation() && field.getNumber() == 6 && field.getLetter().equals("F"))c6F.setVisible(false);
-            if(c6H.isVisible() && !field.isOccupation() && field.getNumber() == 6 && field.getLetter().equals("H"))c6H.setVisible(false);
-
-            if(c5A.isVisible() && !field.isOccupation() && field.getNumber() == 5 && field.getLetter().equals("A"))c5A.setVisible(false);
-            if(c5C.isVisible() && !field.isOccupation() && field.getNumber() == 5 && field.getLetter().equals("C"))c5C.setVisible(false);
-            if(c5E.isVisible() && !field.isOccupation() && field.getNumber() == 5 && field.getLetter().equals("E"))c5E.setVisible(false);
-            if(c5G.isVisible() && !field.isOccupation() && field.getNumber() == 5 && field.getLetter().equals("G"))c5G.setVisible(false);
-
-            if(c4B.isVisible() && !field.isOccupation() && field.getNumber() == 4 && field.getLetter().equals("B"))c4B.setVisible(false);
-            if(c4D.isVisible() && !field.isOccupation() && field.getNumber() == 4 && field.getLetter().equals("D"))c4D.setVisible(false);
-            if(c4F.isVisible() && !field.isOccupation() && field.getNumber() == 4 && field.getLetter().equals("F"))c4F.setVisible(false);
-            if(c4H.isVisible() && !field.isOccupation() && field.getNumber() == 4 && field.getLetter().equals("H"))c4H.setVisible(false);
-
-            if(c3A.isVisible() && !field.isOccupation() && field.getNumber() == 3 && field.getLetter().equals("A"))c3A.setVisible(false);
-            if(c3C.isVisible() && !field.isOccupation() && field.getNumber() == 3 && field.getLetter().equals("D"))c3C.setVisible(false);
-            if(c3E.isVisible() && !field.isOccupation() && field.getNumber() == 3 && field.getLetter().equals("E"))c3E.setVisible(false);
-            if(c3G.isVisible() && !field.isOccupation() && field.getNumber() == 3 && field.getLetter().equals("G"))c3G.setVisible(false);
-
-            if(c2B.isVisible() && !field.isOccupation() && field.getNumber() == 2 && field.getLetter().equals("B"))c2B.setVisible(false);
-            if(c2D.isVisible() && !field.isOccupation() && field.getNumber() == 2 && field.getLetter().equals("D"))c2D.setVisible(false);
-            if(c2F.isVisible() && !field.isOccupation() && field.getNumber() == 2 && field.getLetter().equals("F"))c2F.setVisible(false);
-            if(c2H.isVisible() && !field.isOccupation() && field.getNumber() == 2 && field.getLetter().equals("H"))c2H.setVisible(false);
-
-            if(c1A.isVisible() && !field.isOccupation() && field.getNumber() == 1 && field.getLetter().equals("A"))c1A.setVisible(false);
-            if(c1C.isVisible() && !field.isOccupation() && field.getNumber() == 1 && field.getLetter().equals("C"))c1C.setVisible(false);
-            if(c1E.isVisible() && !field.isOccupation() && field.getNumber() == 1 && field.getLetter().equals("E"))c1E.setVisible(false);
-            if(c1G.isVisible() && !field.isOccupation() && field.getNumber() == 1 && field.getLetter().equals("G"))c1G.setVisible(false);
 
         }
+        for (Map.Entry<String, Piece> entry :redPieces.entrySet()) {
+            if(entry.getKey().equals("1:7")){
+                c8B.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c8B.setFill(Color.PINK);
+                c8B.setVisible(true);
+            }
+            if(entry.getKey().equals("3:7")){
+                c8D.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c8D.setFill(Color.PINK);
+                c8D.setVisible(true);
+            }
+            if(entry.getKey().equals("5:7")){
+                c8F.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c8F.setFill(Color.PINK);
+                c8F.setVisible(true);
+            }
+            if(entry.getKey().equals("7:7")){
+                c8H.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c8H.setFill(Color.PINK);
+                c8H.setVisible(true);
+            }
+            if(entry.getKey().equals("0:6")){
+                c7A.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c7A.setFill(Color.PINK);
+                c7A.setVisible(true);
+            }
+            if(entry.getKey().equals("2:6")){
+                c7C.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c7C.setFill(Color.PINK);
+                c7C.setVisible(true);
+            }
+            if(entry.getKey().equals("4:6")){
+                c7E.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c7E.setFill(Color.PINK);
+                c7E.setVisible(true);
+            }
+            if(entry.getKey().equals("6:6")){
+                c7G.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c7G.setFill(Color.PINK);
+                c7G.setVisible(true);
+            }
+            if(entry.getKey().equals("1:5")){
+                c6B.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c6B.setFill(Color.PINK);
+                c6B.setVisible(true);
+            }
+            if(entry.getKey().equals("3:5")){
+                c6D.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c6D.setFill(Color.PINK);
+                c6D.setVisible(true);
+            }
+            if(entry.getKey().equals("5:5")){
+                c6F.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c6F.setFill(Color.PINK);
+                c6F.setVisible(true);
+            }
+            if(entry.getKey().equals("7:5")){
+                c6H.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c6H.setFill(Color.PINK);
+                c6H.setVisible(true);
+            }
+            if(entry.getKey().equals("0:4")){
+                c5A.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c5A.setFill(Color.PINK);
+                c5A.setVisible(true);
+            }
+            if(entry.getKey().equals("2:4")){
+                c5C.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c5C.setFill(Color.PINK);
+                c5C.setVisible(true);
+            }
+            if(entry.getKey().equals("4:4")){
+                c5E.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c5E.setFill(Color.PINK);
+                c5E.setVisible(true);
+            }
+            if(entry.getKey().equals("6:4")){
+                c5G.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c5G.setFill(Color.PINK);
+                c5G.setVisible(true);
+            }
+            if(entry.getKey().equals("1:3")){
+                c4B.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c4B.setFill(Color.PINK);
+                c4B.setVisible(true);
+            }
+            if(entry.getKey().equals("3:3")){
+                c4D.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c4D.setFill(Color.PINK);
+                c4D.setVisible(true);
+            }
+            if(entry.getKey().equals("5:3")){
+                c4F.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c4F.setFill(Color.PINK);
+                c4F.setVisible(true);
+            }
+            if(entry.getKey().equals("7:3")){
+                c4H.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c4H.setFill(Color.PINK);
+                c4H.setVisible(true);
+            }
+            if(entry.getKey().equals("0:2")){
+                c3A.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c3A.setFill(Color.PINK);
+                c3A.setVisible(true);
+            }
+            if(entry.getKey().equals("2:2")){
+                c3C.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c3C.setFill(Color.PINK);
+                c3C.setVisible(true);
+            }
+            if(entry.getKey().equals("4:2")){
+                c3E.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c3E.setFill(Color.PINK);
+                c3E.setVisible(true);
+            }
+            if(entry.getKey().equals("6:2")){
+                c3G.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c3G.setFill(Color.PINK);
+                c3G.setVisible(true);
+            }
+            if(entry.getKey().equals("1:1")){
+                c2B.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c2B.setFill(Color.PINK);
+                c2B.setVisible(true);
+            }
+            if(entry.getKey().equals("3:1")){
+                c2D.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c2D.setFill(Color.PINK);
+                c2D.setVisible(true);
+            }
+            if(entry.getKey().equals("5:1")){
+                c2F.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c2F.setFill(Color.PINK);
+                c2F.setVisible(true);
+            }
+            if(entry.getKey().equals("7:1")){
+                c2H.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c2H.setFill(Color.PINK);
+                c2H.setVisible(true);
+            }
+            if(entry.getKey().equals("0:0")){
+                c1A.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c1A.setFill(Color.PINK);
+                c1A.setVisible(true);
+            }
+            if(entry.getKey().equals("2:0")){
+                c1C.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c1C.setFill(Color.PINK);
+                c1C.setVisible(true);
+            }
+            if(entry.getKey().equals("4:0")){
+                c1E.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c1E.setFill(Color.PINK);
+                c1E.setVisible(true);
+            }
+            if(entry.getKey().equals("6:0")){
+                c1G.setFill(Color.RED);
+                if(entry.getValue().isKing() == true)c1G.setFill(Color.PINK);
+                c1G.setVisible(true);
+            }
+        }
+    }
+    public void hideAllPieces(){
+
+        c8B.setVisible(false);
+        c8D.setVisible(false);
+        c8F.setVisible(false);
+        c8H.setVisible(false);
+
+        c7A.setVisible(false);
+        c7C.setVisible(false);
+        c7E.setVisible(false);
+        c7G.setVisible(false);
+
+        c6B.setVisible(false);
+        c6D.setVisible(false);
+        c6F.setVisible(false);
+        c6H.setVisible(false);
+
+        c5A.setVisible(false);
+        c5C.setVisible(false);
+        c5E.setVisible(false);
+        c5G.setVisible(false);
+
+        c4B.setVisible(false);
+        c4D.setVisible(false);
+        c4F.setVisible(false);
+        c4H.setVisible(false);
+
+        c3A.setVisible(false);
+        c3C.setVisible(false);
+        c3E.setVisible(false);
+        c3G.setVisible(false);
+
+        c2B.setVisible(false);
+        c2D.setVisible(false);
+        c2F.setVisible(false);
+        c2H.setVisible(false);
+
+        c1A.setVisible(false);
+        c1C.setVisible(false);
+        c1E.setVisible(false);
+        c1G.setVisible(false);
+
+    }
+    public List<String[]> checkMultiMove(String position){
+
+         List<String[]> jumpMoves = new ArrayList<>();
+
+            String[] xy = position.split(":");
+            int x = Integer.valueOf(xy[0]);
+            int y = Integer.valueOf(xy[1]);
+
+        int maxY = y + 1;
+        int minY = y - 1;
+        int minX = x - 1;
+        int maxX = x + 1;
+
+
+        int jumpMaxY = y + 2;
+        int jumpMinY = y - 2;
+        int jumpMaxX = x + 2;
+        int jumpMinX = x - 2;
+
+        String simpleMoveKey1 = utility.createKey(maxX, minY);
+        String simpleMoveKey2 = utility.createKey(minX, minY);
+        String simpleMoveKey3 = utility.createKey(maxX, maxY);
+        String simpleMoveKey4 = utility.createKey(minX, maxY);
+
+        String jumpKey1 = utility.createKey(jumpMaxX, jumpMinY);
+        String jumpKey2 = utility.createKey(jumpMinX, jumpMinY);
+        String jumpKey3 = utility.createKey(jumpMaxX, jumpMaxY);
+        String jumpKey4 = utility.createKey(jumpMinX, jumpMaxY);
+
+
+
+            if (!whitePieces.containsKey(jumpKey1) && !redPieces.containsKey(jumpKey1)) {
+                if (redPieces.containsKey(simpleMoveKey1)) {
+                    if (jumpMaxX <= 7 && jumpMinY >= 0) {
+                        String[] jumpMoveKeys = {jumpKey1, position.substring(0,3), simpleMoveKey1};
+                        jumpMoves.add((jumpMoveKeys));
+                    }
+                }
+            }
+            if (!whitePieces.containsKey(jumpKey2) && !redPieces.containsKey(jumpKey2)) {
+                if (redPieces.containsKey(simpleMoveKey2)) {
+                    if (jumpMinX >= 0 && jumpMinY >= 0 ) {
+                        String[] jumpMoveKeys = {jumpKey2, position.substring(0,3), simpleMoveKey2};
+                        jumpMoves.add(jumpMoveKeys);
+                    }
+                }
+            }
+
+            if (!whitePieces.containsKey(jumpKey3) && !redPieces.containsKey(jumpKey3)) {
+                if (redPieces.containsKey(simpleMoveKey3)) {
+                    if (jumpMaxX <= 7 && jumpMaxY <= 0) {
+                        String[] jumpMoveKeys = {jumpKey3, position.substring(0,3), simpleMoveKey3};
+                        jumpMoves.add((jumpMoveKeys));
+                    }
+                }
+            }
+            if (!whitePieces.containsKey(jumpKey4) && !redPieces.containsKey(jumpKey4)) {
+                if (redPieces.containsKey(simpleMoveKey4)) {
+                    if (jumpMinX >= 0 && jumpMaxY <= 7) {
+                        String[] jumpMoveKeys = {jumpKey4, position.substring(0,3), simpleMoveKey4};
+                        jumpMoves.add(jumpMoveKeys);
+                    }
+                }
+            }
+       return jumpMoves;
+    }
+    public void removeAfterJump(String prev, String next){
+        for (String[] move : jumpMovesToRemove) {
+         if(move[0].equals(next) && move[1].equals(prev)) {
+             redPieces.remove(move[2]);
+         }
+        }
+        jumpMovesToRemove = new ArrayList<>();
+    }
+
+    public void checkAndSetForKing(){
 
 
     }
+    public void botStepMovement(){
 
-
+    }
 }
 

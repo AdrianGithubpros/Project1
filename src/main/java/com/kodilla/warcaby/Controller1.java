@@ -7,7 +7,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
@@ -21,14 +20,10 @@ import java.util.*;
 
 
 public class Controller1 {
-    Timer timer = new Timer();
     private Stage stage;
     private Scene scene;
     private Parent root;
     boolean clicked = false;
-    boolean gameStarted = false;
-    Color playerColor = Color.BLACK;
-    boolean botLost = false;
     private Utility utility = new Utility();
     private AI ai = new AI(utility);
     private Map<String, Piece> redPieces = new HashMap<>();
@@ -40,6 +35,7 @@ public class Controller1 {
     private boolean turn = true;
     private boolean jumpleMove = false;
     private List<String[]> jumpMovesToRemove;
+    private int botLvl = 1;
     @FXML
     private Circle c8B,c8D,c8F,c8H,c7A,c7C,c7E,c7G,c6B,c6D,c6F,c6H,c5A,c5C,c5E,c5G,c4B,c4D,c4F,c4H,c3A,c3C,c3E,c3G, c2B,c2D,c2F,c2H,c1A,c1C,c1E,c1G;
     @FXML
@@ -48,6 +44,10 @@ public class Controller1 {
     private AnchorPane scenePane1;
     @FXML
     private AnchorPane scenePane2;
+    @FXML
+    private Label botLabel;
+    @FXML
+    private Label creditsLabel;
 
     public void setRedPieces(Map<String, Piece> redPieces) {
         this.redPieces = redPieces;
@@ -90,6 +90,9 @@ public class Controller1 {
     }
     public void startWithWhite(ActionEvent event){
         //8
+        refresh();
+        hideAllPieces();
+        hideDots();
         c8B.setFill(Color.RED);
         c8B.setVisible(true);
         c8D.setFill(Color.RED);
@@ -153,9 +156,6 @@ public class Controller1 {
         c1C.setVisible(true);
         c1E.setVisible(true);
         c1G.setVisible(true);
-        System.out.println("hmm somthing is wrong");
-        gameStarted = true;
-        playerColor = Color.WHITE;
         setBoard();
         showPlayerMovements();
 
@@ -176,38 +176,46 @@ public class Controller1 {
     }
 
     // 8
-    public void button8B(ActionEvent event){
-        if(!clicked && c8B.getFill().equals(Color.YELLOW)){
-            int[] field = {1,7};
-            showMovementPlaces(field);
-            if(whitePieces.get("1:7").isKing()){
-                previousPlace = "1:7k";
-            }else{
-                previousPlace = "1:7";
-            }
+    public void button8B(ActionEvent event) throws NullPointerException {
+        try {
+            if (!clicked && (c8B.getFill().equals(Color.YELLOW) || c8B.getFill().equals(Color.GRAY))) {
+                int[] field = {1, 7};
 
-            clicked = true;
+                showMovementPlaces(field);
+                if (whitePieces.get("1:7").isKing()) {
+                    previousPlace = "1:7k";
+                } else {
+                    previousPlace = "1:7";
+                }
+                clicked = true;
 
-        }else if(clicked && c8Bm.isVisible()){
-            hideDots();
-            nextPlace = "1:7";
-            playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
-                aiMove();
+            } else if (clicked && c8Bm.isVisible()) {
+                hideDots();
+                nextPlace = "1:7";
+                playerMove(previousPlace, nextPlace);
+                if (!turn) {
+                    aiMove();
+                    showPlayerMovements();
+                    clicked = false;
+                }
+            } else if (clicked && (c8B.getFill().equals(Color.YELLOW) || c8B.getFill().equals(Color.GRAY)) && c8B.isVisible()) {
+                hideDots();
+
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c8B.getFill().equals(Color.YELLOW) && c8B.isVisible()){
-            hideDots();
-            showPlayerMovements();
-            clicked = false;
+        }catch (NullPointerException e){
+            System.out.println(e);
+        }catch (Exception e){
+            System.out.println(e);
         }
 
-
     }
-    public void button8D(ActionEvent event){
-        if(!clicked && c8D.getFill().equals(Color.YELLOW)){
+    public void button8D(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c8D.getFill().equals(Color.YELLOW)||c8D.getFill().equals(Color.GRAY))){
             int[] field = {3,7};
+
             showMovementPlaces(field);
             clicked = true;
             if(whitePieces.get("3:7").isKing()){
@@ -219,20 +227,26 @@ public class Controller1 {
             hideDots();
             nextPlace = "3:7";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c8D.getFill().equals(Color.YELLOW) && c8D.isVisible()){
+        }else if(clicked && (c8D.getFill().equals(Color.YELLOW)||c8D.getFill().equals(Color.GRAY)) && c8D.isVisible()){
             hideDots();
+
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button8F(ActionEvent event){
-        if(!clicked && c8F.getFill().equals(Color.YELLOW)){
+    public void button8F(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c8F.getFill().equals(Color.YELLOW)||c8F.getFill().equals(Color.GRAY))){
             int[] field = {5,7};
+
             if(whitePieces.get("5:7").isKing()){
                 previousPlace = "5:7k";
             }else{
@@ -245,20 +259,26 @@ public class Controller1 {
             hideDots();
             nextPlace = "5:7";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c8F.getFill().equals(Color.YELLOW) && c8F.isVisible()){
+        }else if(clicked && (c8F.getFill().equals(Color.YELLOW)||c8F.getFill().equals(Color.GRAY)) && c8F.isVisible()){
             hideDots();
+
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button8H(ActionEvent event){
-        if(!clicked && c8H.getFill().equals(Color.YELLOW)){
+    public void button8H(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c8H.getFill().equals(Color.YELLOW)||c8H.getFill().equals(Color.GRAY))){
             int[] field = {7,7};
+
             if(whitePieces.get("7:7").isKing()){
                 previousPlace = "7:7k";
             }else{
@@ -271,20 +291,25 @@ public class Controller1 {
             hideDots();
             nextPlace = "7:7";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c8H.getFill().equals(Color.YELLOW) && c8H.isVisible()){
+        }else if(clicked && (c8H.getFill().equals(Color.YELLOW)||c8H.getFill().equals(Color.GRAY)) && c8H.isVisible()){
             hideDots();
+
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
 
-    public void button7A(ActionEvent event){
-        if(!clicked && c7A.getFill().equals(Color.YELLOW)){
+    public void button7A(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c7A.getFill().equals(Color.YELLOW)||c7A.getFill().equals(Color.GRAY))){
             int[] field = {0,6};
             if(whitePieces.get("0:6").isKing()){
                 previousPlace = "0:6k";
@@ -298,20 +323,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "0:6";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c7A.getFill().equals(Color.YELLOW) && c7A.isVisible()){
+        }else if(clicked && (c7A.getFill().equals(Color.YELLOW)||c7A.getFill().equals(Color.GRAY)) && c7A.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button7C(ActionEvent event){
-        if(!clicked && c7C.getFill().equals(Color.YELLOW)){
+    public void button7C(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c7C.getFill().equals(Color.YELLOW)||c7C.getFill().equals(Color.GRAY))){
             int[] field = {2,6};
             if(whitePieces.get("2:6").isKing()){
                 previousPlace = "2:6k";
@@ -325,20 +353,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "2:6";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c7C.getFill().equals(Color.YELLOW) && c7C.isVisible()){
+        }else if(clicked && (c7C.getFill().equals(Color.YELLOW)||c7C.getFill().equals(Color.GRAY)) && c7C.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button7E(ActionEvent event){
-        if(!clicked && c7E.getFill().equals(Color.YELLOW)){
+    public void button7E(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c7E.getFill().equals(Color.YELLOW)||c7E.getFill().equals(Color.GRAY))){
             int[] field = {4,6};
             if(whitePieces.get("4:6").isKing()){
                 previousPlace = "4:6k";
@@ -352,20 +383,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "4:6";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c7E.getFill().equals(Color.YELLOW) && c7E.isVisible()){
+        }else if(clicked && (c7E.getFill().equals(Color.YELLOW)||c7E.getFill().equals(Color.GRAY)) && c7E.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button7G(ActionEvent event){
-        if(!clicked && c7G.getFill().equals(Color.YELLOW)){
+    public void button7G(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c7G.getFill().equals(Color.YELLOW)||c7G.getFill().equals(Color.GRAY))){
             int[] field = {6,6};
             if(whitePieces.get("6:6").isKing()){
                 previousPlace = "6:6k";
@@ -379,20 +413,24 @@ public class Controller1 {
             hideDots();
             nextPlace = "6:6";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c7G.getFill().equals(Color.YELLOW) && c7G.isVisible()){
+        }else if(clicked && (c7G.getFill().equals(Color.YELLOW)||c7G.getFill().equals(Color.GRAY)) && c7G.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
     // 6
-    public void button6B(ActionEvent event){
-        if(!clicked && c6B.getFill().equals(Color.YELLOW)){
+    public void button6B(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c6B.getFill().equals(Color.YELLOW)||c6B.getFill().equals(Color.GRAY))){
             int[] field = {1,5};
             if(whitePieces.get("1:5").isKing()){
                 previousPlace = "1:5k";
@@ -406,19 +444,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "1:5";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c6B.getFill().equals(Color.YELLOW) && c6B.isVisible()){
+        }else if(clicked && (c6B.getFill().equals(Color.YELLOW)||c6B.getFill().equals(Color.GRAY)) && c6B.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button6D(ActionEvent event){
-        if(!clicked && c6D.getFill().equals(Color.YELLOW)){
+    public void button6D(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c6D.getFill().equals(Color.YELLOW)||c6D.getFill().equals(Color.GRAY))){
             int[] field = {3,5};
             if(whitePieces.get("3:5").isKing()){
                 previousPlace = "3:5k";
@@ -432,20 +474,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "3:5";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c6D.getFill().equals(Color.YELLOW) && c6D.isVisible()){
+        }else if(clicked && (c6D.getFill().equals(Color.YELLOW)||c6D.getFill().equals(Color.GRAY)) && c6D.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button6F(ActionEvent event){
-        if(!clicked && c6F.getFill().equals(Color.YELLOW)){
+    public void button6F(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c6F.getFill().equals(Color.YELLOW)||c6F.getFill().equals(Color.GRAY))){
             int[] field = {5,5};
             if(whitePieces.get("5:5").isKing()){
                 previousPlace = "5:5k";
@@ -459,20 +504,23 @@ public class Controller1 {
             hideDots();
             nextPlace = "5:5";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c6F.getFill().equals(Color.YELLOW) && c6F.isVisible()){
+        }else if(clicked && (c6F.getFill().equals(Color.YELLOW)||c6F.getFill().equals(Color.GRAY)) && c6F.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button6H(ActionEvent event){
-        if(!clicked && c6H.getFill().equals(Color.YELLOW)){
+    public void button6H(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c6H.getFill().equals(Color.YELLOW)||c6H.getFill().equals(Color.GRAY))){
             int[] field = {7,5};
             if(whitePieces.get("7:5").isKing()){
                 previousPlace = "7:5k";
@@ -486,20 +534,24 @@ public class Controller1 {
             hideDots();
             nextPlace = "7:5";
             playerMove(previousPlace ,nextPlace);
-            if(turn == false) {
+            if(!turn) {
                 aiMove();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c6H.getFill().equals(Color.YELLOW) && c6H.isVisible()){
+        }else if(clicked && (c6H.getFill().equals(Color.YELLOW)||c6H.getFill().equals(Color.GRAY)) && c6H.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
     // 5
-    public void button5A(ActionEvent event){
-        if(!clicked && c5A.getFill().equals(Color.YELLOW)){
+    public void button5A(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c5A.getFill().equals(Color.YELLOW)||c5A.getFill().equals(Color.GRAY))){
             int[] field = {0,4};
             if(whitePieces.get("0:4").isKing()){
                 previousPlace = "0:4k";
@@ -518,14 +570,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c5A.getFill().equals(Color.YELLOW) && c5A.isVisible()){
+        }else if(clicked && (c5A.getFill().equals(Color.YELLOW)||c5A.getFill().equals(Color.GRAY)) && c5A.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button5C(ActionEvent event){
-        if(!clicked && c5C.getFill().equals(Color.YELLOW)){
+    public void button5C(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c5C.getFill().equals(Color.YELLOW)||c5C.getFill().equals(Color.GRAY))){
             int[] field = {2,4};
             if(whitePieces.get("2:4").isKing()){
                 previousPlace = "2:4k";
@@ -544,14 +600,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c5C.getFill().equals(Color.YELLOW) && c5C.isVisible()){
+        }else if(clicked && (c5C.getFill().equals(Color.YELLOW)||c5C.getFill().equals(Color.GRAY)) && c5C.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button5E(ActionEvent event){
-        if(!clicked && c5E.getFill().equals(Color.YELLOW)){
+    public void button5E(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c5E.getFill().equals(Color.YELLOW)||c5E.getFill().equals(Color.GRAY))){
             int[] field = {4,4};
             if(whitePieces.get("4:4").isKing()){
                 previousPlace = "4:4k";
@@ -570,14 +630,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c5E.getFill().equals(Color.YELLOW) && c5E.isVisible()){
+        }else if(clicked && (c5E.getFill().equals(Color.YELLOW)||c5E.getFill().equals(Color.GRAY)) && c5E.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button5G(ActionEvent event){
-        if(!clicked && c5G.getFill().equals(Color.YELLOW)){
+    public void button5G(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c5G.getFill().equals(Color.YELLOW)||c5G.getFill().equals(Color.GRAY))){
             int[] field = {6,4};
             if(whitePieces.get("6:4").isKing()){
                 previousPlace = "6:4k";
@@ -596,15 +660,19 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c5G.getFill().equals(Color.YELLOW) && c5G.isVisible()){
+        }else if(clicked && (c5G.getFill().equals(Color.YELLOW)||c5G.getFill().equals(Color.GRAY)) && c5G.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+    }catch (Exception e){
+        System.out.println(e);
+    }
     }
     // 4
-    public void button4B(ActionEvent event){
-        if(!clicked && c4B.getFill().equals(Color.YELLOW)){
+    public void button4B(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c4B.getFill().equals(Color.YELLOW)||c4B.getFill().equals(Color.GRAY))){
             int[] field = {1,3};
             if(whitePieces.get("1:3").isKing()){
                 previousPlace = "1:3k";
@@ -624,15 +692,18 @@ public class Controller1 {
                 clicked = false;
             }
 
-        }else if(clicked && c4B.getFill().equals(Color.YELLOW) && c4B.isVisible()){
+        }else if(clicked && (c4B.getFill().equals(Color.YELLOW)||c4B.getFill().equals(Color.GRAY)) && c4B.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
         }
-    public void button4D(ActionEvent event){
-        if(!clicked && c4D.getFill().equals(Color.YELLOW)){
+        }
+    public void button4D(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c4D.getFill().equals(Color.YELLOW)||c4D.getFill().equals(Color.GRAY))){
             int[] field = {3,3};
             if(whitePieces.get("3:3").isKing()){
                 previousPlace = "3:3k";
@@ -651,14 +722,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c4D.getFill().equals(Color.YELLOW) && c4D.isVisible()){
+        }else if(clicked && (c4D.getFill().equals(Color.YELLOW)||c4D.getFill().equals(Color.GRAY)) && c4D.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+    }catch (Exception e){
+        System.out.println(e);
     }
-    public void button4F(ActionEvent event){
-        if(!clicked && c4F.getFill().equals(Color.YELLOW)){
+    }
+    public void button4F(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c4F.getFill().equals(Color.YELLOW)||c4F.getFill().equals(Color.GRAY))){
             int[] field = {5,3};
             if(whitePieces.get("5:3").isKing()){
                 previousPlace = "5:3k";
@@ -677,14 +752,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c4F.getFill().equals(Color.YELLOW) && c4F.isVisible()){
+        }else if(clicked && (c4F.getFill().equals(Color.YELLOW)||c4F.getFill().equals(Color.GRAY)) && c4F.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button4H(ActionEvent event){
-        if(!clicked && c4H.getFill().equals(Color.YELLOW)){
+    public void button4H(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c4H.getFill().equals(Color.YELLOW)||c4H.getFill().equals(Color.GRAY))){
             int[] field = {7,3};
             if(whitePieces.get("7:3").isKing()){
                 previousPlace = "7:3k";
@@ -703,15 +782,19 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c4H.getFill().equals(Color.YELLOW) && c4H.isVisible()){
+        }else if(clicked && (c4H.getFill().equals(Color.YELLOW)||c4H.getFill().equals(Color.GRAY)) && c4H.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
     // 3
-    public void button3A(ActionEvent event){
-        if(!clicked && c3A.getFill().equals(Color.YELLOW)){
+    public void button3A(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c3A.getFill().equals(Color.YELLOW)||c3A.getFill().equals(Color.GRAY))){
             int[] field = {0,2};
             if(whitePieces.get("0:2").isKing()){
                 previousPlace = "0:2k";
@@ -730,15 +813,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c3A.getFill().equals(Color.YELLOW) && c3A.isVisible()){
+        }else if(clicked && (c3A.getFill().equals(Color.YELLOW)||c3A.getFill().equals(Color.GRAY)) && c3A.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button3C(ActionEvent event){
-        if(!clicked && c3C.getFill().equals(Color.YELLOW)){
+    public void button3C(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c3C.getFill().equals(Color.YELLOW)||c3C.getFill().equals(Color.GRAY))){
             int[] field = {2,2};
             if(whitePieces.get("2:2").isKing()){
                 previousPlace = "2:2k";
@@ -757,14 +843,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c3C.getFill().equals(Color.YELLOW) && c3C.isVisible()){
+        }else if(clicked && (c3C.getFill().equals(Color.YELLOW)||c3C.getFill().equals(Color.GRAY)) && c3C.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button3E(ActionEvent event){
-        if(!clicked && c3E.getFill().equals(Color.YELLOW)){
+    public void button3E(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c3E.getFill().equals(Color.YELLOW)||c3E.getFill().equals(Color.GRAY))){
             int[] field = {4,2};
             if(whitePieces.get("4:2").isKing()){
                 previousPlace = "4:2k";
@@ -783,15 +873,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c3E.getFill().equals(Color.YELLOW) && c3E.isVisible()){
+        }else if(clicked && (c3E.getFill().equals(Color.YELLOW)||c3E.getFill().equals(Color.GRAY)) && c3E.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button3G(ActionEvent event){
-        if(!clicked && c3G.getFill().equals(Color.YELLOW)){
+    public void button3G(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c3G.getFill().equals(Color.YELLOW)||c3G.getFill().equals(Color.GRAY))){
             int[] field = {6,2};
             if(whitePieces.get("6:2").isKing()){
                 previousPlace = "6:2k";
@@ -810,15 +903,19 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c3G.getFill().equals(Color.YELLOW) && c3G.isVisible()){
+        }else if(clicked && (c3G.getFill().equals(Color.YELLOW)||c3G.getFill().equals(Color.GRAY)) && c3G.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
     // 2
-    public void button2B(ActionEvent event){
-        if(!clicked && c2B.getFill().equals(Color.YELLOW)){
+    public void button2B(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c2B.getFill().equals(Color.YELLOW)||c2B.getFill().equals(Color.GRAY))){
             int[] field = {1,1};
             if(whitePieces.get("1:1").isKing()){
                 previousPlace = "1:1k";
@@ -837,14 +934,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c2B.getFill().equals(Color.YELLOW) && c2B.isVisible()){
+        }else if(clicked && (c2B.getFill().equals(Color.YELLOW)||c2B.getFill().equals(Color.GRAY)) && c2B.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button2D(ActionEvent event){
-        if(!clicked && c2D.getFill().equals(Color.YELLOW)){
+    public void button2D(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c2D.getFill().equals(Color.YELLOW)||c2D.getFill().equals(Color.GRAY))){
             int[] field = {3,1};
             if(whitePieces.get("3:1").isKing()){
                 previousPlace = "3:1k";
@@ -863,14 +964,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c2D.getFill().equals(Color.YELLOW) && c2D.isVisible()){
+        }else if(clicked && (c2D.getFill().equals(Color.YELLOW)||c2D.getFill().equals(Color.GRAY)) && c2D.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button2F(ActionEvent event){
-        if(!clicked && c2F.getFill().equals(Color.YELLOW)){
+    public void button2F(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c2F.getFill().equals(Color.YELLOW)||c2F.getFill().equals(Color.GRAY))){
             int[] field = {5,1};
             if(whitePieces.get("5:1").isKing()){
                 previousPlace = "5:1k";
@@ -889,14 +994,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c2F.getFill().equals(Color.YELLOW) && c2F.isVisible()){
+        }else if(clicked && (c2F.getFill().equals(Color.YELLOW)||c2F.getFill().equals(Color.GRAY)) && c2F.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button2H(ActionEvent event){
-        if(!clicked && c2H.getFill().equals(Color.YELLOW)){
+    public void button2H(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c2H.getFill().equals(Color.YELLOW)||c2H.getFill().equals(Color.GRAY))){
             int[] field = {7,1};
             if(whitePieces.get("7:1").isKing()){
                 previousPlace = "7:1k";
@@ -915,15 +1024,19 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c2H.getFill().equals(Color.YELLOW) && c2H.isVisible()){
+        }else if(clicked && (c2H.getFill().equals(Color.YELLOW)||c2H.getFill().equals(Color.GRAY)) && c2H.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
 
-    public void button1A(ActionEvent event){
-        if(!clicked && c1A.getFill().equals(Color.YELLOW)){
+    public void button1A(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c1A.getFill().equals(Color.YELLOW)||c1A.getFill().equals(Color.GRAY))){
             int[] field = {0,0};
             if(whitePieces.get("0:0").isKing()){
                 previousPlace = "0:0k";
@@ -942,14 +1055,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c1A.getFill().equals(Color.YELLOW) && c1A.isVisible()){
+        }else if(clicked && (c1A.getFill().equals(Color.YELLOW)||c1A.getFill().equals(Color.GRAY)) && c1A.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+    }catch (Exception e){
+        System.out.println(e);
     }
-    public void button1C(ActionEvent event){
-        if(!clicked && c1C.getFill().equals(Color.YELLOW)){
+    }
+    public void button1C(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c1C.getFill().equals(Color.YELLOW)||c1C.getFill().equals(Color.GRAY))){
             int[] field = {2,0};
             if(whitePieces.get("2:0").isKing()){
                 previousPlace = "2:0k";
@@ -968,14 +1085,18 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c1C.getFill().equals(Color.YELLOW) && c1C.isVisible()){
+        }else if(clicked && (c1C.getFill().equals(Color.YELLOW)||c1C.getFill().equals(Color.GRAY)) && c1C.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
+        }catch (Exception e){
+            System.out.println(e);
+        }
     }
-    public void button1E(ActionEvent event){
-        if(!clicked && c1E.getFill().equals(Color.YELLOW)){
+    public void button1E(ActionEvent event) throws NullPointerException {
+        try{
+        if(!clicked && (c1E.getFill().equals(Color.YELLOW)||c1E.getFill().equals(Color.GRAY))){
             int[] field = {4,0};
             if(whitePieces.get("4:0").isKing()){
                 previousPlace = "4:0k";
@@ -994,36 +1115,44 @@ public class Controller1 {
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c1E.getFill().equals(Color.YELLOW) && c1E.isVisible()){
+        }else if(clicked && (c1E.getFill().equals(Color.YELLOW)||c1E.getFill().equals(Color.GRAY)) && c1E.isVisible()){
             hideDots();
             showPlayerMovements();
             clicked = false;
         }
-    }
-    public void button1G(ActionEvent event){
-        if(!clicked && c1G.getFill().equals(Color.YELLOW)){
-            int[] field = {6,0};
-            if(whitePieces.get("6:0").isKing()){
-                previousPlace = "6:0k";
-            }else{
-                previousPlace = "6:0";
-            }
-            showMovementPlaces(field);
-            clicked = true;
 
-        }else if(clicked && c1Gm.isVisible()){
-            hideDots();
-            nextPlace = "6:0";
-            playerMove(previousPlace,nextPlace);
-            if(!turn) {
-                aiMove();
+    }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+    public void button1G(ActionEvent event) throws NullPointerException {
+        try {
+            if (!clicked && (c1G.getFill().equals(Color.YELLOW) || c1G.getFill().equals(Color.GRAY))) {
+                int[] field = {6, 0};
+                if (whitePieces.get("6:0").isKing()) {
+                    previousPlace = "6:0k";
+                } else {
+                    previousPlace = "6:0";
+                }
+                showMovementPlaces(field);
+                clicked = true;
+
+            } else if (clicked && c1Gm.isVisible()) {
+                hideDots();
+                nextPlace = "6:0";
+                playerMove(previousPlace, nextPlace);
+                if (!turn) {
+                    aiMove();
+                    showPlayerMovements();
+                    clicked = false;
+                }
+            } else if (clicked && (c1G.getFill().equals(Color.YELLOW) || c1G.getFill().equals(Color.GRAY)) && c1G.isVisible()) {
+                hideDots();
                 showPlayerMovements();
                 clicked = false;
             }
-        }else if(clicked && c1G.getFill().equals(Color.YELLOW) && c1G.isVisible()){
-            hideDots();
-            showPlayerMovements();
-            clicked = false;
+        }catch (Exception e){
+            System.out.println(e);
         }
     }
 
@@ -1104,40 +1233,58 @@ public class Controller1 {
         ai.moveAI(whitePieces,redPieces);
         redPieces = ai.getFinalRedPieces();
         whitePieces = ai.getFinalWhitePieces();
+        if(ai.botLost){
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Win screen");
+            alert.setHeaderText("You have Won");
+            alert.setContentText("Thank you for your game");
+            if(alert.showAndWait().get() == ButtonType.OK){
+                hideDots();
+                hideAllPieces();
+                refresh();
+                stage = (Stage)scenePane1.getScene().getWindow();
+                stage.close();}
+        }
         ai.finalRefresh();
+        checkAndSetForKing();
         hideAllPieces();
         setBoardAfterLoad();
         turn = true;
     }
 
-
-
     public void playerMove(String prev,String next){
-
+        turn = true;
         if(jumpleMove){
-            whitePieces.remove(prev);
+            whitePieces.remove(prev.substring(0,3));
+
             removeAfterJump(prev, next);
             if(prev.length() == 4){
                 whitePieces.put(next.substring(0, 3), new Piece(true));
             }else{
                 whitePieces.put(next, new Piece());
             }
+            previousPlace = next;
             hideAllPieces();
             setBoardAfterLoad();
+
             List<String[]> nextJumps = checkMultiMove(next);
             if(!nextJumps.isEmpty()){
                 setRingsMovementsJump(nextJumps, utility.getXY(next));
             }else{
+                jumpleMove = false;
+                checkAndSetForKing();
                 turn = false;
             }
         }else{
             whitePieces.remove(prev);
+
             if(prev.length() == 4){
                 whitePieces.put(next.substring(0, 3), new Piece(true));
             }else{
                 whitePieces.put(next, new Piece());
             }
             hideAllPieces();
+            checkAndSetForKing();
             setBoardAfterLoad();
             jumpleMove = false;
             turn = false;
@@ -1150,7 +1297,6 @@ public class Controller1 {
 
         if(!jumpMoves.isEmpty()){
             setRingsMovementsJump(jumpMoves,field);
-
         }else{
             setRingsMovementsSimple(simpleMoves,field);
         }
@@ -1167,21 +1313,32 @@ public class Controller1 {
 
         if (!jumpMoves.isEmpty()) {
             setPossibleMovements(jumpMoves);
-
         } else {
             setPossibleMovements(simpleMoves);
         }
         if (whitePieces.size() == 0) {
-            System.out.println("Game Over!");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Lost screen");
+            alert.setHeaderText("You have lost");
+            alert.setContentText("Thank you for your game try next time");
+            if(alert.showAndWait().get() == ButtonType.OK){
+                hideDots();
+                hideAllPieces();
+                refresh();
+                stage = (Stage)scenePane1.getScene().getWindow();
+                stage.close();}
         }
         if (simpleMoves.isEmpty() && jumpMoves.isEmpty()) {
-            System.out.println("Game Over!");
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Lost screen");
+            alert.setHeaderText("You have lost");
+            alert.setContentText("Thank you for your game try next time");
+            if(alert.showAndWait().get() == ButtonType.OK){
+                stage = (Stage)scenePane1.getScene().getWindow();
+                stage.close();}
         }
-        System.out.println("test");
     }
     private void setPossibleMovements(List<String[]> moves) {
-
-       // clearBoard();
 
         for (String[] move : moves) {
             String key = move[1];
@@ -1189,52 +1346,148 @@ public class Controller1 {
             boolean king = whitePieces.get(key).isKing();
 
 
-                if (xy[0] == 1 && xy[1] == 7) c8B.setFill(Color.YELLOW);
-                if (xy[0] == 3 && xy[1] == 7) c8D.setFill(Color.YELLOW);
-                if (xy[0] == 5 && xy[1] == 7) c8F.setFill(Color.YELLOW);
-                if (xy[0] == 7 && xy[1] == 7) c8H.setFill(Color.YELLOW);
+                if (xy[0] == 1 && xy[1] == 7) {
+                    c8B.setFill(Color.YELLOW);
+                if(king)c8B.setFill(Color.GRAY);
+                }
+                if (xy[0] == 3 && xy[1] == 7) {
+                    c8D.setFill(Color.YELLOW);
+                    if(king)c8D.setFill(Color.GRAY);
+                }
+                if (xy[0] == 5 && xy[1] == 7){
+                    c8F.setFill(Color.YELLOW);
+                    if(king)c8F.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 0 && xy[1] == 6) c7A.setFill(Color.YELLOW);
-                if (xy[0] == 2 && xy[1] == 6) c7C.setFill(Color.YELLOW);
-                if (xy[0] == 4 && xy[1] == 6) c7E.setFill(Color.YELLOW);
-                if (xy[0] == 6 && xy[1] == 6) c7G.setFill(Color.YELLOW);
+                if (xy[0] == 7 && xy[1] == 7){
+                    c8H.setFill(Color.YELLOW);
+                    if(king)c8H.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 1 && xy[1] == 5) c6B.setFill(Color.YELLOW);
-                if (xy[0] == 3 && xy[1] == 5) c6D.setFill(Color.YELLOW);
-                if (xy[0] == 5 && xy[1] == 5) c6F.setFill(Color.YELLOW);
-                if (xy[0] == 7 && xy[1] == 5) c6H.setFill(Color.YELLOW);
+                if (xy[0] == 0 && xy[1] == 6){
+                    c7A.setFill(Color.YELLOW);
+                    if(king)c7A.setFill(Color.GRAY);
+                }
+                if (xy[0] == 2 && xy[1] == 6) {
+                    c7C.setFill(Color.YELLOW);
+                    if(king)c7C.setFill(Color.GRAY);
+                }
+                if (xy[0] == 4 && xy[1] == 6){
+                    c7E.setFill(Color.YELLOW);
+                    if(king)c7E.setFill(Color.GRAY);
+                }
+                if (xy[0] == 6 && xy[1] == 6) {
+                    c7G.setFill(Color.YELLOW);
+                    if(king)c7G.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 0 && xy[1] == 4) c5A.setFill(Color.YELLOW);
-                if (xy[0] == 2 && xy[1] == 4) c5C.setFill(Color.YELLOW);
-                if (xy[0] == 4 && xy[1] == 4) c5E.setFill(Color.YELLOW);
-                if (xy[0] == 6 && xy[1] == 4) c5G.setFill(Color.YELLOW);
+                if (xy[0] == 1 && xy[1] == 5){
+                    c6B.setFill(Color.YELLOW);
+                    if(king)c6B.setFill(Color.GRAY);
+                }
+                if (xy[0] == 3 && xy[1] == 5) {
+                    c6D.setFill(Color.YELLOW);
+                    if(king)c6D.setFill(Color.GRAY);
+                }
+                if (xy[0] == 5 && xy[1] == 5){
+                    c6F.setFill(Color.YELLOW);
+                    if(king)c6F.setFill(Color.GRAY);
+                }
+                if (xy[0] == 7 && xy[1] == 5) {
+                    c6H.setFill(Color.YELLOW);
+                    if(king)c6H.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 1 && xy[1] == 3) c4B.setFill(Color.YELLOW);
-                if (xy[0] == 3 && xy[1] == 3) c4D.setFill(Color.YELLOW);
-                if (xy[0] == 5 && xy[1] == 3) c4F.setFill(Color.YELLOW);
-                if (xy[0] == 7 && xy[1] == 3) c4H.setFill(Color.YELLOW);
+                if (xy[0] == 0 && xy[1] == 4){
+                    c5A.setFill(Color.YELLOW);
+                    if(king)c5A.setFill(Color.GRAY);
+                }
+                if (xy[0] == 2 && xy[1] == 4) {
+                    c5C.setFill(Color.YELLOW);
+                    if(king)c5C.setFill(Color.GRAY);
+                }
+                if (xy[0] == 4 && xy[1] == 4) {
+                    c5E.setFill(Color.YELLOW);
+                    if(king)c5E.setFill(Color.GRAY);
+                }
+                if (xy[0] == 6 && xy[1] == 4){
+                    c5G.setFill(Color.YELLOW);
+                    if(king)c5G.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 0 && xy[1] == 2) c3A.setFill(Color.YELLOW);
-                if (xy[0] == 2 && xy[1] == 2) c3C.setFill(Color.YELLOW);
-                if (xy[0] == 4 && xy[1] == 2) c3E.setFill(Color.YELLOW);
-                if (xy[0] == 6 && xy[1] == 2) c3G.setFill(Color.YELLOW);
+                if (xy[0] == 1 && xy[1] == 3) {
+                    c4B.setFill(Color.YELLOW);
+                    if(king)c4B.setFill(Color.GRAY);
+                }
+                if (xy[0] == 3 && xy[1] == 3) {
+                    c4D.setFill(Color.YELLOW);
+                    if(king)c4D.setFill(Color.GRAY);
+                }
+                if (xy[0] == 5 && xy[1] == 3) {
+                    c4F.setFill(Color.YELLOW);
+                    if(king)c4F.setFill(Color.GRAY);
+                }
+                if (xy[0] == 7 && xy[1] == 3) {
+                    c4H.setFill(Color.YELLOW);
+                    if(king)c4H.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 1 && xy[1] == 1) c2B.setFill(Color.YELLOW);
-                if (xy[0] == 3 && xy[1] == 1) c2D.setFill(Color.YELLOW);
-                if (xy[0] == 5 && xy[1] == 1) c2F.setFill(Color.YELLOW);
-                if (xy[0] == 7 && xy[1] == 1) c2H.setFill(Color.YELLOW);
+                if (xy[0] == 0 && xy[1] == 2){
+                    c3A.setFill(Color.YELLOW);
+                    if(king)c3A.setFill(Color.GRAY);
+                }
+                if (xy[0] == 2 && xy[1] == 2) {
+                    c3C.setFill(Color.YELLOW);
+                    if(king)c3C.setFill(Color.GRAY);
+                }
+                if (xy[0] == 4 && xy[1] == 2) {
+                    c3E.setFill(Color.YELLOW);
+                    if(king)c3E.setFill(Color.GRAY);
+                }
+                if (xy[0] == 6 && xy[1] == 2){
+                    c3G.setFill(Color.YELLOW);
+                    if(king)c3G.setFill(Color.GRAY);
+                }
 
-                if (xy[0] == 0 && xy[1] == 0) c1A.setFill(Color.YELLOW);
-                if (xy[0] == 2 && xy[1] == 0) c1C.setFill(Color.YELLOW);
-                if (xy[0] == 4 && xy[1] == 0) c1E.setFill(Color.YELLOW);
-                if (xy[0] == 6 && xy[1] == 0) c1G.setFill(Color.YELLOW);
+                if (xy[0] == 1 && xy[1] == 1){
+                    c2B.setFill(Color.YELLOW);
+                    if(king)c2B.setFill(Color.GRAY);
+                }
+                if (xy[0] == 3 && xy[1] == 1){
+                    c2D.setFill(Color.YELLOW);
+                    if(king)c2D.setFill(Color.GRAY);
+                }
+                if (xy[0] == 5 && xy[1] == 1) {
+                    c2F.setFill(Color.YELLOW);
+                    if(king)c2F.setFill(Color.GRAY);
+                }
+                if (xy[0] == 7 && xy[1] == 1){
+                    c2H.setFill(Color.YELLOW);
+                    if(king)c2H.setFill(Color.GRAY);
+                }
+
+                if (xy[0] == 0 && xy[1] == 0) {
+                    c1A.setFill(Color.YELLOW);
+                    if(king)c1A.setFill(Color.GRAY);
+                }
+                if (xy[0] == 2 && xy[1] == 0){
+                    c1C.setFill(Color.YELLOW);
+                    if(king)c1C.setFill(Color.GRAY);
+                }
+                if (xy[0] == 4 && xy[1] == 0){
+                    c1E.setFill(Color.YELLOW);
+                    if(king)c1E.setFill(Color.GRAY);
+                }
+                if (xy[0] == 6 && xy[1] == 0){
+                    c1G.setFill(Color.YELLOW);
+                    if(king)c1G.setFill(Color.GRAY);
+                }
         }
 
 
     }
     private void setRingsMovementsSimple(List<String[]> moves , int[] xyField) {
 
-        // clearBoard();
         int[] xyRes = xyField;
         for (String[] move : moves) {
             String key = move[1];
@@ -1242,7 +1495,7 @@ public class Controller1 {
 
             int[] xy = utility.getXY(key1);
             int[] xy1 = utility.getXY(key);
-            boolean king = whitePieces.get(key).isKing();
+
 
             if (xy[0] == 1 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Bm.setVisible(true);
             if (xy[0] == 3 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Dm.setVisible(true);
@@ -1298,7 +1551,7 @@ public class Controller1 {
 
             int[] xy = utility.getXY(key1);
             int[] xy1 = utility.getXY(key);
-           // boolean king = whitePieces.get(key).isKing();
+
 
             if (xy[0] == 1 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Bm.setVisible(true);
             if (xy[0] == 3 && xy[1] == 7 && xyRes[0] == xy1[0] && xyRes[1] == xy1[1]) c8Dm.setVisible(true);
@@ -1353,26 +1606,26 @@ public class Controller1 {
     public void save(ActionEvent event)throws FileNotFoundException {
         boolean sureDo = false;
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Save game");
-        alert.setHeaderText("You are saving the game you will lost your last save");
-        alert.setContentText("Are you sure you want to save?");
-        if(alert.showAndWait().get() == ButtonType.OK){
+       alert.setTitle("Save game");
+       alert.setHeaderText("You are saving the game you will lost your last save");
+     alert.setContentText("Are you sure you want to save?");
+      if(alert.showAndWait().get() == ButtonType.OK){
           sureDo = true;
-            }
-        if(sureDo == true) {
+           }
+        if(sureDo) {
             try {
-
                 saveLoad.save(whitePieces, redPieces);
             } catch (FileNotFoundException e) {
+                System.out.println("error" + e);
                 Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION);
                 alert1.setTitle("Error");
                 alert1.setHeaderText("File missing");
                 alert1.setContentText("There is problem with a file check if file save.txt is in resources");
-                if (alert1.showAndWait().get() == ButtonType.OK) {
+                if(alert1.showAndWait().get() == ButtonType.OK) {
                 }
             }
 
-        }
+       }
     }
     public void laod(ActionEvent event)throws FileNotFoundException {
         boolean sureDo = false;
@@ -1383,14 +1636,16 @@ public class Controller1 {
         if (alert.showAndWait().get() == ButtonType.OK) {
             sureDo = true;
         }
-        if(sureDo == true) {
+        if(sureDo) {
             try {
                 saveLoad.laod();
+                refresh();
+                hideDots();
+                hideAllPieces();
                 setWhitePieces(saveLoad.getWhiteMap());
                 setRedPieces(saveLoad.getRedMap());
                 setBoardAfterLoad();
-                clicked = false;
-                gameStarted = true;
+                showPlayerMovements();
                 hideDots();
             } catch (FileNotFoundException e) {
                 Alert alert1 = new Alert(Alert.AlertType.CONFIRMATION);
@@ -1407,162 +1662,162 @@ public class Controller1 {
         for (Map.Entry<String, Piece> entry :whitePieces.entrySet()) {
         if(entry.getKey().equals("1:7")){
             c8B.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c8B.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c8B.setFill(Color.GRAY);
             c8B.setVisible(true);
         }
         if(entry.getKey().equals("3:7")){
             c8D.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c8D.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c8D.setFill(Color.GRAY);
             c8D.setVisible(true);
             }
         if(entry.getKey().equals("5:7")){
             c8F.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c8F.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c8F.setFill(Color.GRAY);
             c8F.setVisible(true);
             }
         if(entry.getKey().equals("7:7")){
             c8H.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c8H.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c8H.setFill(Color.GRAY);
             c8H.setVisible(true);
             }
         if(entry.getKey().equals("0:6")){
             c7A.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c7A.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c7A.setFill(Color.GRAY);
             c7A.setVisible(true);
             }
         if(entry.getKey().equals("2:6")){
             c7C.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c7C.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c7C.setFill(Color.GRAY);
             c7C.setVisible(true);
             }
         if(entry.getKey().equals("4:6")){
             c7E.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c7E.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c7E.setFill(Color.GRAY);
             c7E.setVisible(true);
             }
         if(entry.getKey().equals("6:6")){
             c7G.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c7G.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c7G.setFill(Color.GRAY);
             c7G.setVisible(true);
             }
         if(entry.getKey().equals("1:5")){
             c6B.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c6B.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c6B.setFill(Color.GRAY);
             c6B.setVisible(true);
             }
         if(entry.getKey().equals("3:5")){
             c6D.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c6D.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c6D.setFill(Color.GRAY);
             c6D.setVisible(true);
             }
         if(entry.getKey().equals("5:5")){
             c6F.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c6F.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c6F.setFill(Color.GRAY);
             c6F.setVisible(true);
             }
         if(entry.getKey().equals("7:5")){
             c6H.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c6H.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c6H.setFill(Color.GRAY);
             c6H.setVisible(true);
             }
         if(entry.getKey().equals("0:4")){
             c5A.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c5A.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c5A.setFill(Color.GRAY);
             c5A.setVisible(true);
             }
         if(entry.getKey().equals("2:4")){
             c5C.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c5C.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c5C.setFill(Color.GRAY);
             c5C.setVisible(true);
             }
         if(entry.getKey().equals("4:4")){
             c5E.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c5E.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c5E.setFill(Color.GRAY);
             c5E.setVisible(true);
             }
         if(entry.getKey().equals("6:4")){
             c5G.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c5G.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c5G.setFill(Color.GRAY);
             c5G.setVisible(true);
             }
         if(entry.getKey().equals("1:3")){
                 c4B.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c4B.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c4B.setFill(Color.GRAY);
                 c4B.setVisible(true);
             }
         if(entry.getKey().equals("3:3")){
                 c4D.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c4D.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c4D.setFill(Color.GRAY);
                 c4D.setVisible(true);
             }
         if(entry.getKey().equals("5:3")){
                 c4F.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c4F.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c4F.setFill(Color.GRAY);
                 c4F.setVisible(true);
             }
         if(entry.getKey().equals("7:3")){
                 c4H.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c4H.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c4H.setFill(Color.GRAY);
                 c4H.setVisible(true);
             }
         if(entry.getKey().equals("0:2")){
                 c3A.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c3A.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c3A.setFill(Color.GRAY);
                 c3A.setVisible(true);
             }
         if(entry.getKey().equals("2:2")){
                 c3C.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c3C.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c3C.setFill(Color.GRAY);
                 c3C.setVisible(true);
             }
         if(entry.getKey().equals("4:2")){
                 c3E.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c3E.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c3E.setFill(Color.GRAY);
                 c3E.setVisible(true);
             }
         if(entry.getKey().equals("6:2")){
                 c3G.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c3G.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c3G.setFill(Color.GRAY);
                 c3G.setVisible(true);
             }
         if(entry.getKey().equals("1:1")){
                 c2B.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c2B.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c2B.setFill(Color.GRAY);
                 c2B.setVisible(true);
             }
         if(entry.getKey().equals("3:1")){
                 c2D.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c2D.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c2D.setFill(Color.GRAY);
                 c2D.setVisible(true);
             }
         if(entry.getKey().equals("5:1")){
                 c2F.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c2F.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c2F.setFill(Color.GRAY);
                 c2F.setVisible(true);
             }
         if(entry.getKey().equals("7:1")){
                 c2H.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c2H.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c2H.setFill(Color.GRAY);
                 c2H.setVisible(true);
             }
         if(entry.getKey().equals("0:0")){
                 c1A.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c1A.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c1A.setFill(Color.GRAY);
                 c1A.setVisible(true);
             }
         if(entry.getKey().equals("2:0")){
                 c1C.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c1C.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c1C.setFill(Color.GRAY);
                 c1C.setVisible(true);
             }
         if(entry.getKey().equals("4:0")){
                 c1E.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c1E.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c1E.setFill(Color.GRAY);
                 c1E.setVisible(true);
             }
         if(entry.getKey().equals("6:0")){
                 c1G.setFill(Color.WHITE);
-            if(entry.getValue().isKing() == true)c1G.setFill(Color.GRAY);
+            if(entry.getValue().isKing())c1G.setFill(Color.GRAY);
                 c1G.setVisible(true);
             }
 
@@ -1571,162 +1826,162 @@ public class Controller1 {
         for (Map.Entry<String, Piece> entry :redPieces.entrySet()) {
             if(entry.getKey().equals("1:7")){
                 c8B.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c8B.setFill(Color.PINK);
+                if(entry.getValue().isKing())c8B.setFill(Color.PINK);
                 c8B.setVisible(true);
             }
             if(entry.getKey().equals("3:7")){
                 c8D.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c8D.setFill(Color.PINK);
+                if(entry.getValue().isKing())c8D.setFill(Color.PINK);
                 c8D.setVisible(true);
             }
             if(entry.getKey().equals("5:7")){
                 c8F.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c8F.setFill(Color.PINK);
+                if(entry.getValue().isKing())c8F.setFill(Color.PINK);
                 c8F.setVisible(true);
             }
             if(entry.getKey().equals("7:7")){
                 c8H.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c8H.setFill(Color.PINK);
+                if(entry.getValue().isKing())c8H.setFill(Color.PINK);
                 c8H.setVisible(true);
             }
             if(entry.getKey().equals("0:6")){
                 c7A.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c7A.setFill(Color.PINK);
+                if(entry.getValue().isKing())c7A.setFill(Color.PINK);
                 c7A.setVisible(true);
             }
             if(entry.getKey().equals("2:6")){
                 c7C.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c7C.setFill(Color.PINK);
+                if(entry.getValue().isKing())c7C.setFill(Color.PINK);
                 c7C.setVisible(true);
             }
             if(entry.getKey().equals("4:6")){
                 c7E.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c7E.setFill(Color.PINK);
+                if(entry.getValue().isKing())c7E.setFill(Color.PINK);
                 c7E.setVisible(true);
             }
             if(entry.getKey().equals("6:6")){
                 c7G.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c7G.setFill(Color.PINK);
+                if(entry.getValue().isKing())c7G.setFill(Color.PINK);
                 c7G.setVisible(true);
             }
             if(entry.getKey().equals("1:5")){
                 c6B.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c6B.setFill(Color.PINK);
+                if(entry.getValue().isKing())c6B.setFill(Color.PINK);
                 c6B.setVisible(true);
             }
             if(entry.getKey().equals("3:5")){
                 c6D.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c6D.setFill(Color.PINK);
+                if(entry.getValue().isKing())c6D.setFill(Color.PINK);
                 c6D.setVisible(true);
             }
             if(entry.getKey().equals("5:5")){
                 c6F.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c6F.setFill(Color.PINK);
+                if(entry.getValue().isKing())c6F.setFill(Color.PINK);
                 c6F.setVisible(true);
             }
             if(entry.getKey().equals("7:5")){
                 c6H.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c6H.setFill(Color.PINK);
+                if(entry.getValue().isKing())c6H.setFill(Color.PINK);
                 c6H.setVisible(true);
             }
             if(entry.getKey().equals("0:4")){
                 c5A.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c5A.setFill(Color.PINK);
+                if(entry.getValue().isKing())c5A.setFill(Color.PINK);
                 c5A.setVisible(true);
             }
             if(entry.getKey().equals("2:4")){
                 c5C.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c5C.setFill(Color.PINK);
+                if(entry.getValue().isKing())c5C.setFill(Color.PINK);
                 c5C.setVisible(true);
             }
             if(entry.getKey().equals("4:4")){
                 c5E.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c5E.setFill(Color.PINK);
+                if(entry.getValue().isKing())c5E.setFill(Color.PINK);
                 c5E.setVisible(true);
             }
             if(entry.getKey().equals("6:4")){
                 c5G.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c5G.setFill(Color.PINK);
+                if(entry.getValue().isKing())c5G.setFill(Color.PINK);
                 c5G.setVisible(true);
             }
             if(entry.getKey().equals("1:3")){
                 c4B.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c4B.setFill(Color.PINK);
+                if(entry.getValue().isKing())c4B.setFill(Color.PINK);
                 c4B.setVisible(true);
             }
             if(entry.getKey().equals("3:3")){
                 c4D.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c4D.setFill(Color.PINK);
+                if(entry.getValue().isKing())c4D.setFill(Color.PINK);
                 c4D.setVisible(true);
             }
             if(entry.getKey().equals("5:3")){
                 c4F.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c4F.setFill(Color.PINK);
+                if(entry.getValue().isKing())c4F.setFill(Color.PINK);
                 c4F.setVisible(true);
             }
             if(entry.getKey().equals("7:3")){
                 c4H.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c4H.setFill(Color.PINK);
+                if(entry.getValue().isKing())c4H.setFill(Color.PINK);
                 c4H.setVisible(true);
             }
             if(entry.getKey().equals("0:2")){
                 c3A.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c3A.setFill(Color.PINK);
+                if(entry.getValue().isKing())c3A.setFill(Color.PINK);
                 c3A.setVisible(true);
             }
             if(entry.getKey().equals("2:2")){
                 c3C.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c3C.setFill(Color.PINK);
+                if(entry.getValue().isKing())c3C.setFill(Color.PINK);
                 c3C.setVisible(true);
             }
             if(entry.getKey().equals("4:2")){
                 c3E.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c3E.setFill(Color.PINK);
+                if(entry.getValue().isKing())c3E.setFill(Color.PINK);
                 c3E.setVisible(true);
             }
             if(entry.getKey().equals("6:2")){
                 c3G.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c3G.setFill(Color.PINK);
+                if(entry.getValue().isKing())c3G.setFill(Color.PINK);
                 c3G.setVisible(true);
             }
             if(entry.getKey().equals("1:1")){
                 c2B.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c2B.setFill(Color.PINK);
+                if(entry.getValue().isKing())c2B.setFill(Color.PINK);
                 c2B.setVisible(true);
             }
             if(entry.getKey().equals("3:1")){
                 c2D.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c2D.setFill(Color.PINK);
+                if(entry.getValue().isKing())c2D.setFill(Color.PINK);
                 c2D.setVisible(true);
             }
             if(entry.getKey().equals("5:1")){
                 c2F.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c2F.setFill(Color.PINK);
+                if(entry.getValue().isKing())c2F.setFill(Color.PINK);
                 c2F.setVisible(true);
             }
             if(entry.getKey().equals("7:1")){
                 c2H.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c2H.setFill(Color.PINK);
+                if(entry.getValue().isKing())c2H.setFill(Color.PINK);
                 c2H.setVisible(true);
             }
             if(entry.getKey().equals("0:0")){
                 c1A.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c1A.setFill(Color.PINK);
+                if(entry.getValue().isKing())c1A.setFill(Color.PINK);
                 c1A.setVisible(true);
             }
             if(entry.getKey().equals("2:0")){
                 c1C.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c1C.setFill(Color.PINK);
+                if(entry.getValue().isKing())c1C.setFill(Color.PINK);
                 c1C.setVisible(true);
             }
             if(entry.getKey().equals("4:0")){
                 c1E.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c1E.setFill(Color.PINK);
+                if(entry.getValue().isKing())c1E.setFill(Color.PINK);
                 c1E.setVisible(true);
             }
             if(entry.getKey().equals("6:0")){
                 c1G.setFill(Color.RED);
-                if(entry.getValue().isKing() == true)c1G.setFill(Color.PINK);
+                if(entry.getValue().isKing())c1G.setFill(Color.PINK);
                 c1G.setVisible(true);
             }
         }
@@ -1850,11 +2105,55 @@ public class Controller1 {
     }
 
     public void checkAndSetForKing(){
+        for (String key : redPieces.keySet()) {
+            int[] xy = utility.getXY(key);
+            if(xy[1] == 0){
+                redPieces.get(key).setKing(true);
+            }
+        }
+        for (String key : whitePieces.keySet()) {
+            int[] xy = utility.getXY(key);
+            if(xy[1] == 7){
+                whitePieces.get(key).setKing(true);
+            }
+        }
+    }
+    public void refresh(){
+         clicked = false;
+         utility = new Utility();
+         ai = new AI(utility);
+        redPieces = new HashMap<>();
+        whitePieces = new HashMap<>();
+        previousPlace = "";
+        nextPlace = "";
+        turn = true;
+        jumpleMove = false;
+        jumpMovesToRemove = new ArrayList<>();
+        botLvl = 1;
+        botLabel.setText("Bot level: Easy");
+    }
+    public void botButton(ActionEvent event){
+        botLvl++;
+        if(botLvl % 4 ==1){
+            botLabel.setText("Bot level: Easy");
+            ai.setLevel(ai.EASY);
+        }
+        if(botLvl % 4 ==2){
+            botLabel.setText("Bot level: Medium");
+            ai.setLevel(ai.MEDIUM);}
 
+        if(botLvl % 4 ==3){
+            botLabel.setText("Bot level: Hard");
+            ai.setLevel(ai.HARD);
+        }
+        if(botLvl % 4 == 0){
+            botLabel.setText("Bot level: Very Hard");
+            ai.setLevel(ai.VERY_HARD);
+        }
 
     }
-    public void botStepMovement(){
-
+    public void creditsDisplay(ActionEvent event)  {
+        creditsLabel.setText("Adrian Zienkiewicz");
     }
 }
 

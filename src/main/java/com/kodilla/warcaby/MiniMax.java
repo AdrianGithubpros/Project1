@@ -60,10 +60,7 @@ public class MiniMax {
                 ai.makeMove(move, copyWhitePieces, copyRedPieces, false , true);
 
                 utility.getPossibleMoves(copyWhitePieces, copyRedPieces, false);
-                jumpMoves = utility.getJumpMoves();
-                if (!jumpMoves.isEmpty()) {
-                   // ai.makeMove(jumpMoves.get(0), copyWhitePieces, copyRedPieces, false , true);
-                }
+
                 score = miniMax(copyWhitePieces, copyRedPieces, depth - 1, alpha, beta, false);
 
                 if (score <= beta) {

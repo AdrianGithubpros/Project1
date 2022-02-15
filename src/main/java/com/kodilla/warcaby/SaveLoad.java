@@ -16,7 +16,7 @@ public class SaveLoad {
         String whiteString = "";
         String redString = "";
         for (Map.Entry<String, Piece> entry :whitePieces.entrySet()) {
-            if(entry.getValue().isKing() == true){
+            if(entry.getValue().isKing()){
                 whiteString = whiteString + entry.getKey() + "K/";
             }else {
                 whiteString = whiteString + entry.getKey() + "/";
@@ -24,7 +24,7 @@ public class SaveLoad {
         }
 
         for (Map.Entry<String, Piece> entry :redPieces.entrySet()) {
-            if(entry.getValue().isKing() == true){
+            if(entry.getValue().isKing()){
                 redString = redString + entry.getKey() + "K/";
             }else {
                 redString = redString + entry.getKey() + "/";
@@ -55,12 +55,11 @@ public class SaveLoad {
         String redString = in.nextLine();
         String[] whiteTable = whiteString.split("/");
         String[] redTable = redString.split("/");
-        Map<String, Piece> redMap = new HashMap<>();
-        Map<String, Piece> whiteMap = new HashMap<>();
+
         for (int i = 0; i < whiteTable.length ;i++){
             if(whiteTable[i].length() == 4){
                 String actualValue = whiteTable[i].substring(0, 3);
-             whiteMap.put(actualValue, new Piece(true));
+               whiteMap.put(actualValue, new Piece(true));
             }else{
                 whiteMap.put(whiteTable[i], new Piece(false));
             }

@@ -13,6 +13,7 @@ public class AI {
 
     private Map<String, Piece> finalRedPieces = new HashMap<>();
     private Map<String, Piece> finalWhitePieces = new HashMap<>();
+    public boolean botLost = false;
     public String formerPositionKey;
     private int level;
     public int recursionCounter;
@@ -20,7 +21,8 @@ public class AI {
     public AI(Utility utility) {
         this.utility = utility;
         miniMax = new MiniMax(utility, this);
-        level = AI.MEDIUM;
+        level = AI.EASY;
+
     }
 
     public void makeMove(String[] movements, Map<String, Piece> whitePieces, Map<String, Piece> redPieces, boolean realMove , boolean player) {
@@ -110,11 +112,12 @@ public class AI {
         List<String[]> jumpMoves = utility.getJumpMoves();
 
         if (simpleMoves.isEmpty() && jumpMoves.isEmpty()) {
-            System.out.println(" bot nie moze sie rusac");
+            botLost = true;
+
         } else {
 
             recursionCounter = 1;
-           int a = miniMax.miniMax(utility.deepCopyMap(whitePieces), utility.deepCopyMap(redPieces), level, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+            miniMax.miniMax(utility.deepCopyMap(whitePieces), utility.deepCopyMap(redPieces), level, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
 
 
             String[] bestMove = miniMax.getBestMove();
@@ -146,7 +149,6 @@ public class AI {
                 whitePieces.remove(keys.get(i)[0]);
                 int finalI = i;
 
-
                     whitePieces.remove(keys.get(finalI)[0]);
 
                     redPieces.put(keys.get(finalI)[1],new Piece());
@@ -156,7 +158,6 @@ public class AI {
                     }
             }
         }
-
          finalRedPieces = redPieces;
          finalWhitePieces = whitePieces;
     }

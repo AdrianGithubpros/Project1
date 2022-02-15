@@ -17,23 +17,23 @@
          </image>
       </ImageView>
       <Rectangle arcHeight="5.0" arcWidth="5.0" height="769.0" layoutX="769.0" stroke="BLACK" strokeType="INSIDE" width="598.0" />
-      <Button layoutX="1154.0" layoutY="33.0" mnemonicParsing="false" onAction="#startWithWhite" prefHeight="46.0" prefWidth="183.0" text="Start with White">
+      <Button layoutX="973.0" layoutY="22.0" mnemonicParsing="false" onAction="#startWithWhite" prefHeight="46.0" prefWidth="183.0" text="Start with White">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="1154.0" layoutY="169.0" mnemonicParsing="false" onAction="#laod" prefHeight="46.0" prefWidth="183.0" text="Load last game">
+      <Button layoutX="973.0" layoutY="133.0" mnemonicParsing="false" onAction="#laod" prefHeight="46.0" prefWidth="183.0" text="Load last game">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button fx:id="quitButtonGame" layoutX="1154.0" layoutY="303.0" mnemonicParsing="false" onAction="#quitGameToDesktop" prefHeight="46.0" prefWidth="183.0" text="Quit to Desktop">
+      <Button fx:id="quitButtonGame" layoutX="973.0" layoutY="292.0" mnemonicParsing="false" onAction="#quitGameToDesktop" prefHeight="46.0" prefWidth="183.0" text="Quit to Desktop">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="1154.0" layoutY="233.0" mnemonicParsing="false" onAction="#quitToMenu" prefHeight="46.0" prefWidth="183.0" text="Quit to Menu">
+      <Button layoutX="973.0" layoutY="241.0" mnemonicParsing="false" onAction="#quitToMenu" prefHeight="46.0" prefWidth="183.0" text="Quit to Menu">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Label fx:id="checkLabel" alignment="CENTER" layoutX="867.0" layoutY="28.0" prefHeight="103.0" prefWidth="183.0" text="Label" textFill="#b8c91f">
+      <Label fx:id="botLabel" alignment="CENTER" layoutX="769.0" layoutY="393.0" prefHeight="84.0" prefWidth="591.0" text="Bot level Easy" textFill="#1cff2b">
          <font>
             <Font size="57.0" />
          </font>
@@ -134,7 +134,12 @@
       <Button layoutX="607.0" layoutY="233.0" mnemonicParsing="false" onAction="#button6H" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="6H" />
       <Button layoutX="385.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7E" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7E" />
       <Button layoutX="530.0" layoutY="161.0" mnemonicParsing="false" onAction="#button7G" opacity="0.0" prefHeight="78.0" prefWidth="77.0" text="7G" />
-      <Button layoutX="1154.0" layoutY="102.0" mnemonicParsing="false" onAction="#save" prefHeight="46.0" prefWidth="183.0" text="Save game">
+      <Button layoutX="973.0" layoutY="79.0" mnemonicParsing="false" onAction="#save" prefHeight="46.0" prefWidth="183.0" text="Save game">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
+      <Button layoutX="973.0" layoutY="184.0" mnemonicParsing="false" onAction="#botButton" prefHeight="46.0" prefWidth="183.0" text="Change bot lvl">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>

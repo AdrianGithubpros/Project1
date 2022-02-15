@@ -57,7 +57,7 @@ public class Utility {
         String jumpKey4 = createKey(jumpMinX, jumpMaxY);
 
 
-        //if (king || !player) {
+
             if (!whitePieces.containsKey(jumpKey1) && !redPieces.containsKey(jumpKey1)) {
                 if (currentPlayer.containsKey(simpleMoveKey1)) {
                     if (jumpMaxX <= MAX_BOARDER && jumpMinY >= MIN_BOARDER) {
@@ -74,8 +74,7 @@ public class Utility {
                     }
                 }
             }
-      //  }
-      //  if (king || player) {
+
             if (!whitePieces.containsKey(jumpKey3) && !redPieces.containsKey(jumpKey3)) {
                 if (currentPlayer.containsKey(simpleMoveKey3)) {
                     if (jumpMaxX <= MAX_BOARDER && jumpMaxY <= MAX_BOARDER) {
@@ -92,7 +91,7 @@ public class Utility {
                     }
                 }
             }
-      //  }
+
 
         if (jumpMoves.isEmpty()) {
             if (king || !player) {
